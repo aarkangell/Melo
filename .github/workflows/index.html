@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DJ MELO</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sf: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+    --sf-mono: "SF Mono", "Monaco", "Inconsolata", "DM Mono", monospace;
+  }
+</style>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --wall: #4CAF82;
+  --finder-bg: #f5f5f5;
+  --sidebar-bg: #e8e8e8;
+  --sidebar-text: #333;
+  --sidebar-active: #007aff;
+  --titlebar: #d8d8d8;
+  --border: #c8c8c8;
+  --icon-blue: #4faaff;
+  --text-dark: #1a1a1a;
+  --text-mid: #555;
+  --accent: #00e87a;
+}
+
+body {
+  font-family: var(--sf);
+  background: linear-gradient(160deg, #3a9e6e 0%, #4CAF82 40%, #5bcb93 70%, #3d9469 100%);
+  min-height: 100vh;
+  overflow: hidden;
+  position: relative;
+  cursor: default;
+  user-select: none;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===================== MENUBAR ===================== */
+.menubar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 24px;
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  z-index: 9999;
+  border-bottom: 1px solid rgba(0,0,0,0.15);
+}
+
+.menubar-left {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font-size: 12px;
+  color: #fff;
+}
+
+.menubar-apple { font-size: 14px; }
+.menubar-brand { font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.2em; color: #00e87a; }
+.menubar-items { display: flex; gap: 16px; opacity: 0.8; font-size: 12px; }
+
+.menubar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.85);
+  font-family: 'DM Mono', monospace;
+}
+
+/* ===================== DESKTOP ===================== */
+.desktop {
+  position: fixed;
+  inset: 24px 0 0 0;
+  z-index: 1;
+}
+
+/* ===================== FINDER WINDOW ===================== */
+.finder-window {
+  position: absolute;
+  min-width: 560px;
+  min-height: 400px;
+  background: var(--finder-bg);
+  border-radius: 10px;
+  box-shadow:
+    0 2px 0 rgba(0,0,0,0.12),
+    0 8px 32px rgba(0,0,0,0.35),
+    0 0 0 0.5px rgba(0,0,0,0.18);
+  overflow: hidden;
+  display: none;
+  flex-direction: column;
+  animation: winOpen 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  will-change: transform;
+}
+
+.finder-window.open { display: flex; }
+
+@keyframes winOpen {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.finder-titlebar {
+  height: 36px;
+  background: linear-gradient(to bottom, #d8d8d8, #cccccc);
+  border-bottom: 1px solid #b0b0b0;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 0;
+  flex-shrink: 0;
+  cursor: grab;
+  position: relative;
+}
+
+.finder-titlebar:active { cursor: grabbing; }
+
+.traffic-lights {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  z-index: 2;
+}
+
+.tl {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  border: 0.5px solid rgba(0,0,0,0.18);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0;
+  transition: filter 0.1s;
+}
+
+.tl:hover { font-size: 7px; }
+
+.tl-red { background: radial-gradient(circle at 40% 38%, #ff8080, #ff5f57); }
+.tl-yellow { background: radial-gradient(circle at 40% 38%, #ffe085, #ffbd2e); }
+.tl-green { background: radial-gradient(circle at 40% 38%, #73f57e, #28c941); }
+.tl-red:hover { background: radial-gradient(circle at 40% 38%, #ff5f57, #e0443c); }
+
+.finder-title {
+  position: absolute;
+  left: 50%; transform: translateX(-50%);
+  font-size: 12px;
+  font-weight: 600;
+  color: #444;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.finder-path {
+  margin-left: auto;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: #888;
+  background: rgba(0,0,0,0.06);
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+.finder-toolbar {
+  height: 36px;
+  background: linear-gradient(to bottom, #e8e8e8, #ddd);
+  border-bottom: 1px solid #c0c0c0;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.tb-btn {
+  width: 22px; height: 22px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.5);
+  border: 1px solid rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  cursor: pointer;
+  color: #555;
+}
+
+.tb-btn:hover { background: rgba(255,255,255,0.8); }
+
+.tb-sep { width: 1px; height: 18px; background: rgba(0,0,0,0.15); margin: 0 4px; }
+
+.tb-search {
+  margin-left: auto;
+  height: 20px;
+  width: 140px;
+  background: rgba(255,255,255,0.7);
+  border: 1px solid rgba(0,0,0,0.2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  gap: 4px;
+  font-size: 11px;
+  color: #888;
+}
+
+.finder-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.finder-sidebar {
+  width: 170px;
+  background: rgba(220,220,220,0.6);
+  border-right: 1px solid #c0c0c0;
+  padding: 10px 0;
+  flex-shrink: 0;
+  overflow-y: auto;
+  backdrop-filter: blur(10px);
+}
+
+.sidebar-section { padding: 0 0 8px; }
+
+.sidebar-heading {
+  font-size: 10px;
+  font-weight: 700;
+  color: #888;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0 12px 4px;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-family: var(--sf);
+  font-weight: 400;
+  color: var(--sidebar-text);
+  cursor: pointer;
+  border-radius: 6px;
+  margin: 0 4px;
+  transition: background 0.1s;
+  letter-spacing: -0.01em;
+}
+
+.sidebar-item:hover { background: rgba(0,0,0,0.07); }
+.sidebar-item.active { background: #007aff; color: #fff; }
+.sidebar-item.active .si-icon { filter: brightness(10); }
+
+.si-icon { width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.si-icon svg { width: 14px; height: 14px; fill: #666; }
+.sidebar-item.active .si-icon svg { fill: #fff; }
+.si-count {
+  margin-left: auto;
+  background: rgba(0,0,0,0.12);
+  color: #666;
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  font-family: var(--sf-mono);
+}
+
+.sidebar-item.active .si-count { background: rgba(255,255,255,0.25); color: #fff; }
+
+.finder-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.2) transparent;
+}
+
+/* Photo thumbnails */
+.photo-thumb {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  border: 2px solid transparent;
+  transition: all 0.15s;
+}
+
+.photo-thumb:hover { border-color: #007aff; transform: scale(1.02); }
+.photo-thumb.selected { border-color: #007aff; }
+
+.photo-label {
+  font-size: 10px;
+  color: #666;
+  font-family: var(--sf-mono);
+  margin-top: 4px;
+  text-align: center;
+}
+
+.photo-col { display: flex; flex-direction: column; gap: 4px; }
+
+/* Preview window */
+.preview-window {
+  position: absolute;
+  background: #1a1a1a;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  display: none;
+  border: 1px solid rgba(255,255,255,0.1);
+  z-index: 5000;
+}
+
+.preview-window.open { display: block; }
+
+.preview-titlebar {
+  height: 28px;
+  background: #2a2a2a;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 6px;
+  cursor: grab;
+  border-bottom: 1px solid #111;
+}
+
+.preview-title {
+  margin-left: 8px;
+  font-size: 11px;
+  color: #888;
+  font-family: 'DM Mono', monospace;
+}
+
+.preview-content {
+  width: 300px;
+  height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 80px;
+  background: #111;
+}
+
+/* List view */
+.list-view { display: flex; flex-direction: column; }
+
+.list-header {
+  display: grid;
+  grid-template-columns: 1fr 80px 100px;
+  padding: 4px 10px;
+  border-bottom: 1px solid #d0d0d0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #666;
+  background: #e8e8e8;
+}
+
+.list-row {
+  display: grid;
+  grid-template-columns: 1fr 80px 100px;
+  padding: 6px 10px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  font-size: 12px;
+  color: #333;
+  cursor: pointer;
+  align-items: center;
+  transition: background 0.1s;
+}
+
+.list-row:hover { background: rgba(0,122,255,0.1); }
+.list-row.playing { background: rgba(0,232,122,0.1); color: #007a40; }
+
+.list-icon { margin-right: 8px; font-size: 13px; }
+.list-name { display: flex; align-items: center; }
+.list-dur { font-family: 'DM Mono', monospace; color: #888; font-size: 11px; }
+.list-genre {
+  font-size: 10px;
+  background: rgba(0,122,255,0.12);
+  color: #007aff;
+  padding: 2px 7px;
+  border-radius: 8px;
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+}
+.list-row.playing .list-genre { background: rgba(0,232,122,0.15); color: #00a855; }
+
+/* Events */
+.events-list { display: flex; flex-direction: column; gap: 10px; padding: 4px 0; }
+
+.event-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: rgba(255,255,255,0.6);
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.08);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.event-row:hover { background: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+
+.event-date-box {
+  text-align: center;
+  min-width: 44px;
+  padding: 6px 8px;
+  background: linear-gradient(135deg, #ff5f57, #e0443c);
+  border-radius: 8px;
+  color: #fff;
+}
+
+.ev-day { font-size: 18px; font-weight: 800; line-height: 1; }
+.ev-month { font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.85; }
+
+.event-info { flex: 1; }
+.ev-name { font-size: 13px; font-weight: 700; color: #1a1a1a; margin-bottom: 3px; }
+.ev-venue { font-size: 11px; color: #888; }
+
+.ev-tag {
+  font-size: 10px;
+  background: rgba(0,0,0,0.07);
+  color: #555;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-family: 'DM Mono', monospace;
+}
+
+.ev-ticket {
+  background: #007aff;
+  color: #fff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 14px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+/* Socials */
+.socials-list { display: flex; flex-direction: column; gap: 2px; }
+
+.social-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.1s;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.social-row:hover { background: rgba(0,122,255,0.08); }
+
+.social-icon-box {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.social-name { font-size: 13px; font-weight: 600; color: #1a1a1a; }
+.social-handle { font-size: 11px; color: #888; margin-top: 1px; font-family: 'DM Mono', monospace; }
+.social-arrow { margin-left: auto; color: #ccc; font-size: 16px; }
+
+/* About */
+.about-body { padding: 4px 0; }
+.about-header { display: flex; gap: 16px; margin-bottom: 20px; align-items: flex-start; }
+.about-avi {
+  width: 72px; height: 72px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #00e87a, #007a40);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0,200,100,0.3);
+}
+
+.about-avi-info h2 { font-size: 20px; font-family: 'Orbitron', sans-serif; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
+.about-avi-info p { font-size: 12px; color: #888; line-height: 1.6; }
+
+.about-divider { height: 1px; background: #e0e0e0; margin: 16px 0; }
+
+.about-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 16px; }
+.astat {
+  text-align: center;
+  padding: 10px;
+  background: rgba(255,255,255,0.7);
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.07);
+}
+
+.astat-n { font-size: 20px; font-weight: 800; font-family: 'Orbitron', sans-serif; color: #007aff; }
+.astat-l { font-size: 10px; color: #888; margin-top: 2px; letter-spacing: 0.08em; text-transform: uppercase; }
+
+.about-bio-text { font-size: 13px; line-height: 1.75; color: #444; }
+
+.skill-list { margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+.sk { display: flex; flex-direction: column; gap: 5px; }
+.sk-top { display: flex; justify-content: space-between; font-size: 12px; color: #555; }
+.sk-pct { font-family: 'DM Mono', monospace; color: #007aff; font-size: 11px; }
+.sk-bar { height: 5px; background: #e0e0e0; border-radius: 3px; overflow: hidden; }
+.sk-fill { height: 100%; background: linear-gradient(90deg, #007aff, #00c4ff); border-radius: 3px; transition: width 1s ease; }
+
+/* Booking */
+.booking-body { display: flex; flex-direction: column; gap: 14px; }
+.booking-top { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.binfo-card {
+  padding: 14px;
+  background: rgba(255,255,255,0.7);
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.07);
+  text-align: center;
+}
+
+.bi-icon { font-size: 22px; margin-bottom: 6px; }
+.bi-label { font-size: 10px; color: #999; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 3px; }
+.bi-val { font-size: 12px; font-weight: 600; color: #007aff; font-family: 'DM Mono', monospace; }
+
+.bform { display: flex; flex-direction: column; gap: 10px; }
+.brow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.bgroup { display: flex; flex-direction: column; gap: 4px; }
+.bgroup label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+.bgroup input, .bgroup select, .bgroup textarea {
+  background: rgba(255,255,255,0.8);
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 12px;
+  color: #1a1a1a;
+  outline: none;
+  font-family: var(--sf);
+  transition: border-color 0.15s;
+}
+.bgroup input:focus, .bgroup select:focus, .bgroup textarea:focus { border-color: #007aff; }
+.bgroup textarea { height: 60px; resize: none; }
+
+.bsubmit {
+  background: #007aff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 11px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: all 0.15s;
+}
+.bsubmit:hover { background: #0067e0; }
+
+/* Home */
+.home-content { padding: 28px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px; background: var(--finder-bg); }
+
+.home-vinyl {
+  width: 110px; height: 110px;
+  border-radius: 50%;
+  background: repeating-radial-gradient(circle, #111 0, #111 2px, #1e1e1e 2px, #1e1e1e 5px);
+  position: relative;
+  animation: spin 5s linear infinite;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  flex-shrink: 0;
+}
+
+.home-vinyl::after {
+  content: '';
+  position: absolute;
+  inset: 34%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00e87a, #007a40);
+  box-shadow: 0 0 16px rgba(0,232,122,0.5);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.home-name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 42px;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: #1a1a1a;
+  line-height: 1;
+}
+
+.home-subtitle {
+  font-size: 11px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: #007aff;
+  font-weight: 600;
+}
+
+.home-eq {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 30px;
+}
+
+.home-bar {
+  width: 5px;
+  border-radius: 2px 2px 0 0;
+  background: linear-gradient(to top, #007aff, #00c4ff);
+  animation: eq var(--d) ease-in-out infinite alternate;
+}
+
+@keyframes eq {
+  from { height: var(--a); }
+  to { height: var(--b); }
+}
+
+.home-tags { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.htag {
+  font-size: 11px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.07);
+  color: #555;
+  border: 1px solid rgba(0,0,0,0.1);
+  font-family: 'DM Mono', monospace;
+}
+
+/* ===================== DESKTOP ICONS ===================== */
+.desktop-icons {
+  position: fixed;
+  right: 16px;
+  top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 2;
+}
+
+.d-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  width: 76px;
+  text-align: center;
+  transition: background 0.1s;
+}
+
+.d-icon:hover { background: rgba(255,255,255,0.2); }
+.d-icon.selected { background: rgba(0,122,255,0.35); }
+
+.d-icon-img {
+  width: 52px; height: 52px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.d-icon-img svg {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  overflow: visible;
+  filter: drop-shadow(0 3px 8px rgba(0,0,0,0.35));
+}
+
+.d-icon-label {
+  font-size: 11px;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  line-height: 1.25;
+}
+
+/* ===================== DOCK ===================== */
+.dock-wrap {
+  position: fixed;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+}
+
+.dock {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.22);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.4);
+  box-shadow:
+    0 0 0 0.5px rgba(0,0,0,0.2),
+    0 8px 32px rgba(0,0,0,0.3),
+    inset 0 1px 0 rgba(255,255,255,0.5);
+}
+
+.d-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.d-item:hover { transform: translateY(-16px) scale(1.3); }
+
+.d-item-icon {
+  width: 52px; height: 52px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  overflow: hidden;
+}
+
+.d-item-icon svg {
+  width: 52px;
+  height: 52px;
+  display: block;
+}
+
+.d-tooltip {
+  position: absolute;
+  bottom: calc(100% + 16px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.75);
+  color: #fff;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+  font-weight: 600;
+}
+
+.d-item:hover .d-tooltip { opacity: 1; }
+
+.d-dot {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.5);
+  margin-top: 3px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.d-dot.on { opacity: 1; }
+
+.dock-sep {
+  width: 1px; height: 42px;
+  background: rgba(0,0,0,0.18);
+  align-self: center;
+  margin: 0 3px;
+}
+
+.finder-statusbar {
+  height: 20px;
+  background: #e8e8e8;
+  border-top: 1px solid #c8c8c8;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  font-size: 10px;
+  color: #888;
+  font-family: 'DM Mono', monospace;
+  flex-shrink: 0;
+}
+</style>
+</head>
+<body>
+
+<!-- Menubar -->
+<div class="menubar">
+  <div class="menubar-left">
+    <span class="menubar-apple">🎵</span>
+    <span class="menubar-brand">MELO</span>
+    <div class="menubar-items">
+      <span>Finder</span><span>File</span><span>Edit</span><span>View</span><span>Go</span><span>Window</span><span>Help</span>
+    </div>
+  </div>
+  <div class="menubar-right">
+    <span>🔋</span>
+    <span>📶</span>
+    <span id="clock">Thu 24 Apr 22:25</span>
+  </div>
+</div>
+
+<!-- SVG Icon Definitions (reusable macOS-style) -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <!-- Finder icon -->
+    <linearGradient id="ig-finder" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6ac9f5"/>
+      <stop offset="100%" stop-color="#1e8fd6"/>
+    </linearGradient>
+    <!-- Music icon -->
+    <linearGradient id="ig-music" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fc5c7d"/>
+      <stop offset="100%" stop-color="#b5002e"/>
+    </linearGradient>
+    <!-- Calendar icon -->
+    <linearGradient id="ig-cal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff6b6b"/>
+      <stop offset="100%" stop-color="#ee0979"/>
+    </linearGradient>
+    <!-- Photos icon -->
+    <linearGradient id="ig-photos" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fff"/>
+      <stop offset="100%" stop-color="#f0f0f0"/>
+    </linearGradient>
+    <!-- Messages icon -->
+    <linearGradient id="ig-msg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5bf56a"/>
+      <stop offset="100%" stop-color="#1cb83f"/>
+    </linearGradient>
+    <!-- App Store icon -->
+    <linearGradient id="ig-appstore" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3cc8ff"/>
+      <stop offset="100%" stop-color="#0a84ff"/>
+    </linearGradient>
+    <!-- FaceTime icon -->
+    <linearGradient id="ig-facetime" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5cf575"/>
+      <stop offset="100%" stop-color="#1db954"/>
+    </linearGradient>
+    <!-- Notes icon -->
+    <linearGradient id="ig-notes-top" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffd259"/>
+      <stop offset="100%" stop-color="#ffbc00"/>
+    </linearGradient>
+    <!-- Home icon -->
+    <linearGradient id="ig-home" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f5f5f5"/>
+      <stop offset="100%" stop-color="#e0e0e0"/>
+    </linearGradient>
+    <!-- Numbers/green -->
+    <linearGradient id="ig-numbers" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5aed7a"/>
+      <stop offset="100%" stop-color="#1e9e3e"/>
+    </linearGradient>
+    <!-- Contacts -->
+    <linearGradient id="ig-contacts" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f0c060"/>
+      <stop offset="100%" stop-color="#c07820"/>
+    </linearGradient>
+    <!-- Melo custom purple -->
+    <linearGradient id="ig-melo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00e87a"/>
+      <stop offset="100%" stop-color="#007a40"/>
+    </linearGradient>
+    <!-- Booking/mail -->
+    <linearGradient id="ig-mail" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4fb4ff"/>
+      <stop offset="100%" stop-color="#0070e0"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<!-- Desktop folder icons (right side) -->
+<div class="desktop-icons">
+  <div class="d-icon" onclick="openWin('home')">
+    <div class="d-icon-img">
+      <!-- Finder-style icon for Home -->
+      <svg viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg">
+        <rect width="52" height="52" rx="12" fill="url(#ig-finder)"/>
+        <!-- Finder face -->
+        <rect x="6" y="14" width="20" height="24" rx="3" fill="#1c5fa0"/>
+        <rect x="28" y="14" width="18" height="24" rx="3" fill="#fff" opacity="0.9"/>
+        <!-- Eyes -->
+        <ellipse cx="13" cy="24" rx="4" ry="4" fill="white"/>
+        <ellipse cx="13" cy="24" rx="2.2" ry="2.2" fill="#1a7fe8"/>
+        <ellipse cx="13" cy="24" rx="1" ry="1" fill="#000"/>
+        <ellipse cx="22" cy="24" rx="4" ry="4" fill="white"/>
+        <ellipse cx="22" cy="24" rx="2.2" ry="2.2" fill="#1a7fe8"/>
+        <ellipse cx="22" cy="24" rx="1" ry="1" fill="#000"/>
+        <!-- Smile -->
+        <path d="M10 30 Q17.5 35 25 30" stroke="white" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="d-icon-label">DJ Melo</div>
+  </div>
+  <div class="d-icon" onclick="openWin('gallery')">
+    <div class="d-icon-img">
+      <!-- Photos-style icon -->
+      <svg viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg">
+        <rect width="52" height="52" rx="12" fill="white"/>
+        <g transform="translate(26,26)">
+          <ellipse rx="5" ry="5" fill="#ff3b30" transform="rotate(0) translate(0,-12)"/>
+          <ellipse rx="5" ry="5" fill="#ff9500" transform="rotate(45) translate(0,-12)"/>
+          <ellipse rx="5" ry="5" fill="#ffcc00" transform="rotate(90) translate(0,-12)"/>
+          <ellipse rx="5" ry="5" fill="#4cd964" transform="rotate(135) translate(0,-12)"/>
+          <ellipse rx="5" ry="5" fill="#007aff" transform="rotate(180) translate(0,-12)"/>
+          <ellipse rx="5" ry="5" fill="#5856d6" transform="rotate(225) translate(0,-12)"/>
+          <ellipse rx="5" ry="5" fill="#ff2d55" transform="rotate(270) translate(0,-12)"/>
+          <ellipse rx="5" ry="5" fill="#ff6b35" transform="rotate(315) translate(0,-12)"/>
+        </g>
+        <circle cx="26" cy="26" r="6" fill="white"/>
+      </svg>
+    </div>
+    <div class="d-icon-label">Gallery 2026</div>
+  </div>
+  <div class="d-icon" onclick="openWin('mixes')">
+    <div class="d-icon-img">
+      <!-- Music-style icon -->
+      <svg viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg">
+        <rect width="52" height="52" rx="12" fill="url(#ig-music)"/>
+        <circle cx="26" cy="26" r="14" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+        <circle cx="26" cy="26" r="9" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+        <!-- Note -->
+        <path d="M23 20 L23 31 M23 31 a3.5 3.5 0 1 0 3.5-3.5" stroke="white" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+        <rect x="23" y="19" width="7" height="2.5" rx="1" fill="white"/>
+      </svg>
+    </div>
+    <div class="d-icon-label">Mixes</div>
+  </div>
+</div>
+
+<!-- Desktop -->
+<div class="desktop" id="desktop">
+
+  <!-- HOME WINDOW -->
+  <div class="finder-window" id="win-home" style="width:480px; top:40px; left:220px; z-index:100;">
+    <div class="finder-titlebar" data-win="home">
+      <div class="traffic-lights">
+        <div class="tl tl-red" onclick="closeWin('home')">✕</div>
+        <div class="tl tl-yellow">–</div>
+        <div class="tl tl-green">+</div>
+      </div>
+      <div class="finder-title">DJ MELO — Home</div>
+      <div class="finder-path">~/djmelo</div>
+    </div>
+    <div class="finder-toolbar">
+      <div class="tb-btn">‹</div>
+      <div class="tb-btn">›</div>
+      <div class="tb-sep"></div>
+      <div class="tb-btn">⊞</div>
+      <div class="tb-btn">☰</div>
+      <div class="tb-search">🔍 Search</div>
+    </div>
+    <div style="display:flex; flex:1; overflow:hidden;">
+      <div class="finder-sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-heading">Favourites</div>
+          <div class="sidebar-item active" onclick="openWin('home')"><span class="si-icon">🏠</span> Home</div>
+          <div class="sidebar-item" onclick="openWin('mixes')"><span class="si-icon">🎵</span> Mixes <span class="si-count">5</span></div>
+          <div class="sidebar-item" onclick="openWin('events')"><span class="si-icon">📅</span> Events <span class="si-count">4</span></div>
+          <div class="sidebar-item" onclick="openWin('gallery')"><span class="si-icon">🖼</span> Gallery <span class="si-count">9</span></div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-heading">Links</div>
+          <div class="sidebar-item" onclick="openWin('socials')"><span class="si-icon">🔗</span> Socials</div>
+          <div class="sidebar-item" onclick="openWin('about')"><span class="si-icon">👤</span> About</div>
+          <div class="sidebar-item" onclick="openWin('booking')"><span class="si-icon">📩</span> Book Me</div>
+        </div>
+      </div>
+      <div style="flex:1; overflow-y:auto; display:flex; align-items:center; justify-content:center;">
+        <div class="home-content">
+          <div class="home-vinyl"></div>
+          <div class="home-name">MELO</div>
+          <div class="home-subtitle">London · Electronic · Afrobeats · House</div>
+          <div class="home-eq" id="homeEq"></div>
+          <div class="home-tags">
+            <span class="htag">Fabric Resident</span>
+            <span class="htag">8+ Years</span>
+            <span class="htag">200+ Shows</span>
+            <span class="htag">London 🇬🇧</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="finder-statusbar">7 items · Updated today</div>
+  </div>
+
+  <!-- MIXES WINDOW -->
+  <div class="finder-window" id="win-mixes" style="width:620px; top:70px; left:260px; z-index:100;">
+    <div class="finder-titlebar" data-win="mixes">
+      <div class="traffic-lights">
+        <div class="tl tl-red" onclick="closeWin('mixes')">✕</div>
+        <div class="tl tl-yellow">–</div>
+        <div class="tl tl-green">+</div>
+      </div>
+      <div class="finder-title">Mixes</div>
+      <div class="finder-path">~/djmelo/mixes</div>
+    </div>
+    <div class="finder-toolbar">
+      <div class="tb-btn">‹</div><div class="tb-btn">›</div>
+      <div class="tb-sep"></div>
+      <div class="tb-btn">☰</div><div class="tb-btn">⊞</div>
+      <div class="tb-search">🔍 Search</div>
+    </div>
+    <div style="display:flex; flex:1; overflow:hidden;">
+      <div class="finder-sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-heading">Favourites</div>
+          <div class="sidebar-item" onclick="openWin('home')"><span class="si-icon">🏠</span> Home</div>
+          <div class="sidebar-item active"><span class="si-icon">🎵</span> Mixes <span class="si-count">5</span></div>
+          <div class="sidebar-item" onclick="openWin('events')"><span class="si-icon">📅</span> Events</div>
+          <div class="sidebar-item" onclick="openWin('gallery')"><span class="si-icon">🖼</span> Gallery</div>
+          <div class="sidebar-item" onclick="openWin('socials')"><span class="si-icon">🔗</span> Socials</div>
+          <div class="sidebar-item" onclick="openWin('about')"><span class="si-icon">👤</span> About</div>
+          <div class="sidebar-item" onclick="openWin('booking')"><span class="si-icon">📩</span> Book Me</div>
+        </div>
+      </div>
+      <div class="finder-content">
+        <div class="list-view">
+          <div class="list-header"><span>Name</span><span>Duration</span><span>Genre</span></div>
+          <div class="list-row playing">
+            <span class="list-name"><span class="list-icon">🎵</span>Late Night Frequencies Vol. 4</span>
+            <span class="list-dur">1:24:32</span>
+            <span class="list-genre">House</span>
+          </div>
+          <div class="list-row">
+            <span class="list-name"><span class="list-icon">🎵</span>Afro Sessions — Spring 2026</span>
+            <span class="list-dur">58:14</span>
+            <span class="list-genre">Afrobeats</span>
+          </div>
+          <div class="list-row">
+            <span class="list-name"><span class="list-icon">🎵</span>Fabric Residency — March 2026</span>
+            <span class="list-dur">2:02:44</span>
+            <span class="list-genre">Techno</span>
+          </div>
+          <div class="list-row">
+            <span class="list-name"><span class="list-icon">🎵</span>Sunset Sessions — Ibiza</span>
+            <span class="list-dur">1:12:08</span>
+            <span class="list-genre">Melodic</span>
+          </div>
+          <div class="list-row">
+            <span class="list-name"><span class="list-icon">🎵</span>Bass Underground — Winter Mix</span>
+            <span class="list-dur">47:30</span>
+            <span class="list-genre">UK Bass</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="finder-statusbar">5 items, 6.3 GB available</div>
+  </div>
+
+  <!-- GALLERY WINDOW -->
+  <div class="finder-window" id="win-gallery" style="width:660px; top:50px; left:180px; z-index:100;">
+    <div class="finder-titlebar" data-win="gallery">
+      <div class="traffic-lights">
+        <div class="tl tl-red" onclick="closeWin('gallery')">✕</div>
+        <div class="tl tl-yellow">–</div>
+        <div class="tl tl-green">+</div>
+      </div>
+      <div class="finder-title">Gallery 2026</div>
+      <div class="finder-path">~/djmelo/gallery</div>
+    </div>
+    <div class="finder-toolbar">
+      <div class="tb-btn">‹</div><div class="tb-btn">›</div>
+      <div class="tb-sep"></div>
+      <div class="tb-btn">⊞</div><div class="tb-btn">☰</div>
+      <div class="tb-search">🔍 Search</div>
+    </div>
+    <div style="display:flex; flex:1; overflow:hidden;">
+      <div class="finder-sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-heading">Favourites</div>
+          <div class="sidebar-item" onclick="openWin('home')"><span class="si-icon">🏠</span> Home</div>
+          <div class="sidebar-item" onclick="openWin('mixes')"><span class="si-icon">🎵</span> Mixes</div>
+          <div class="sidebar-item" onclick="openWin('events')"><span class="si-icon">📅</span> Events</div>
+          <div class="sidebar-item active"><span class="si-icon">🖼</span> Gallery <span class="si-count">9</span></div>
+          <div class="sidebar-item" onclick="openWin('socials')"><span class="si-icon">🔗</span> Socials</div>
+          <div class="sidebar-item" onclick="openWin('about')"><span class="si-icon">👤</span> About</div>
+          <div class="sidebar-item" onclick="openWin('booking')"><span class="si-icon">📩</span> Book Me</div>
+        </div>
+        <div class="sidebar-section" style="margin-top:8px;">
+          <div class="sidebar-heading">Albums</div>
+          <div class="sidebar-item"><span class="si-icon">📁</span> Fabric 2026</div>
+          <div class="sidebar-item"><span class="si-icon">📁</span> Ibiza</div>
+          <div class="sidebar-item"><span class="si-icon">📁</span> Studio</div>
+          <div class="sidebar-item"><span class="si-icon">📁</span> Press</div>
+        </div>
+      </div>
+      <div class="finder-content">
+        <div style="display:flex; gap:10px;">
+          <div style="flex:1; display:flex; flex-direction:column; gap:10px;">
+            <div class="photo-col">
+              <div class="photo-thumb" style="background:linear-gradient(135deg,#1a0533,#4CAF82); height:130px;" onclick="openPreview('🎧','Melo_Fabric_01.jpg')">🎧</div>
+              <div class="photo-label">Melo_Fabric_01.jpg</div>
+            </div>
+            <div class="photo-col">
+              <div class="photo-thumb" style="background:linear-gradient(135deg,#0f3443,#34e89e); height:100px;" onclick="openPreview('🔮','Melo_Studio_03.jpg')">🔮</div>
+              <div class="photo-label">Melo_Studio_03.jpg</div>
+            </div>
+            <div class="photo-col">
+              <div class="photo-thumb" style="background:linear-gradient(135deg,#0d1b2a,#f7b733); height:110px;" onclick="openPreview('⚡','Melo_Press_07.jpg')">⚡</div>
+              <div class="photo-label">Melo_Press_07.jpg</div>
+            </div>
+          </div>
+          <div style="flex:1; display:flex; flex-direction:column; gap:10px; margin-top:24px;">
+            <div class="photo-col">
+              <div class="photo-thumb" style="background:linear-gradient(135deg,#2d1b69,#e91e63); height:115px;" onclick="openPreview('🌃','Melo_Ibiza_02.jpg')">🌃</div>
+              <div class="photo-label">Melo_Ibiza_02.jpg</div>
+            </div>
+            <div class="photo-col">
+              <div class="photo-thumb" style="background:linear-gradient(135deg,#1a1a2e,#00c4ff); height:95px;" onclick="openPreview('🌊','Melo_Stage_05.jpg')">🌊</div>
+              <div class="photo-label">Melo_Stage_05.jpg</div>
+            </div>
+            <div class="photo-col">
+              <div class="photo-thumb" style="background:linear-gradient(135deg,#1a0a0a,#c0392b); height:120px;" onclick="openPreview('🔥','Melo_Live_09.jpg')">🔥</div>
+              <div class="photo-label">Melo_Live_09.jpg</div>
+            </div>
+          </div>
+          <div style="flex:1; display:flex; flex-direction:column; gap:10px; margin-top:12px;">
+            <div class="photo-col">
+              <div class="photo-thumb" style="background:linear-gradient(135deg,#0a1628,#6dd4a0); height:105px;" onclick="openPreview('🎼','Melo_Setup_04.jpg')">🎼</div>
+              <div class="photo-label">Melo_Setup_04.jpg</div>
+            </div>
+            <div class="photo-col">
+              <div class="photo-thumb" style="background:linear-gradient(135deg,#2c3e50,#8e44ad); height:125px;" onclick="openPreview('✨','Melo_Crowd_06.jpg')">✨</div>
+              <div class="photo-label">Melo_Crowd_06.jpg</div>
+            </div>
+            <div class="photo-col">
+              <div class="photo-thumb" style="background:linear-gradient(135deg,#0d0d0d,#00e87a); height:90px;" onclick="openPreview('🎛','Melo_Booth_08.jpg')">🎛</div>
+              <div class="photo-label">Melo_Booth_08.jpg</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="finder-statusbar">9 of 9 selected · 247 MB</div>
+  </div>
+
+  <!-- EVENTS WINDOW -->
+  <div class="finder-window" id="win-events" style="width:580px; top:60px; left:240px; z-index:100;">
+    <div class="finder-titlebar" data-win="events">
+      <div class="traffic-lights">
+        <div class="tl tl-red" onclick="closeWin('events')">✕</div>
+        <div class="tl tl-yellow">–</div>
+        <div class="tl tl-green">+</div>
+      </div>
+      <div class="finder-title">Upcoming Events</div>
+      <div class="finder-path">~/djmelo/events</div>
+    </div>
+    <div class="finder-toolbar">
+      <div class="tb-btn">‹</div><div class="tb-btn">›</div>
+      <div class="tb-sep"></div>
+      <div class="tb-btn">⊞</div>
+      <div class="tb-search">🔍 Search</div>
+    </div>
+    <div style="display:flex; flex:1; overflow:hidden;">
+      <div class="finder-sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-heading">Favourites</div>
+          <div class="sidebar-item" onclick="openWin('home')"><span class="si-icon">🏠</span> Home</div>
+          <div class="sidebar-item" onclick="openWin('mixes')"><span class="si-icon">🎵</span> Mixes</div>
+          <div class="sidebar-item active"><span class="si-icon">📅</span> Events <span class="si-count">4</span></div>
+          <div class="sidebar-item" onclick="openWin('gallery')"><span class="si-icon">🖼</span> Gallery</div>
+          <div class="sidebar-item" onclick="openWin('socials')"><span class="si-icon">🔗</span> Socials</div>
+          <div class="sidebar-item" onclick="openWin('about')"><span class="si-icon">👤</span> About</div>
+          <div class="sidebar-item" onclick="openWin('booking')"><span class="si-icon">📩</span> Book Me</div>
+        </div>
+      </div>
+      <div class="finder-content">
+        <div class="events-list">
+          <div class="event-row">
+            <div class="event-date-box"><div class="ev-day">02</div><div class="ev-month">May</div></div>
+            <div class="event-info">
+              <div class="ev-name">FABRIC London — Late Night</div>
+              <div class="ev-venue">📍 Fabric, EC1A, London · 23:00–06:00</div>
+            </div>
+            <span class="ev-tag">House</span>
+            <button class="ev-ticket">Tickets</button>
+          </div>
+          <div class="event-row">
+            <div class="event-date-box"><div class="ev-day">18</div><div class="ev-month">May</div></div>
+            <div class="event-info">
+              <div class="ev-name">Amsterdam Dance Festival</div>
+              <div class="ev-venue">📍 Shelter, Amsterdam</div>
+            </div>
+            <span class="ev-tag">Live</span>
+            <button class="ev-ticket">Tickets</button>
+          </div>
+          <div class="event-row">
+            <div class="event-date-box"><div class="ev-day">07</div><div class="ev-month">Jun</div></div>
+            <div class="event-info">
+              <div class="ev-name">Notting Hill After Party</div>
+              <div class="ev-venue">📍 XOYO, London</div>
+            </div>
+            <span class="ev-tag">Afrobeats</span>
+            <button class="ev-ticket">Tickets</button>
+          </div>
+          <div class="event-row">
+            <div class="event-date-box" style="background:linear-gradient(135deg,#28c941,#007a20);">
+              <div class="ev-day">21</div><div class="ev-month">Jun</div>
+            </div>
+            <div class="event-info">
+              <div class="ev-name">Summer Solstice — Open Air</div>
+              <div class="ev-venue">📍 Victoria Park, London</div>
+            </div>
+            <span class="ev-tag">Outdoor</span>
+            <button class="ev-ticket" style="background:#28c941;">Free</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="finder-statusbar">4 upcoming events</div>
+  </div>
+
+  <!-- SOCIALS WINDOW -->
+  <div class="finder-window" id="win-socials" style="width:500px; top:80px; left:280px; z-index:100;">
+    <div class="finder-titlebar" data-win="socials">
+      <div class="traffic-lights">
+        <div class="tl tl-red" onclick="closeWin('socials')">✕</div>
+        <div class="tl tl-yellow">–</div>
+        <div class="tl tl-green">+</div>
+      </div>
+      <div class="finder-title">Social Links</div>
+      <div class="finder-path">~/djmelo/socials</div>
+    </div>
+    <div style="display:flex; flex:1; overflow:hidden;">
+      <div class="finder-sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-heading">Favourites</div>
+          <div class="sidebar-item" onclick="openWin('home')"><span class="si-icon">🏠</span> Home</div>
+          <div class="sidebar-item" onclick="openWin('mixes')"><span class="si-icon">🎵</span> Mixes</div>
+          <div class="sidebar-item" onclick="openWin('events')"><span class="si-icon">📅</span> Events</div>
+          <div class="sidebar-item" onclick="openWin('gallery')"><span class="si-icon">🖼</span> Gallery</div>
+          <div class="sidebar-item active"><span class="si-icon">🔗</span> Socials</div>
+          <div class="sidebar-item" onclick="openWin('about')"><span class="si-icon">👤</span> About</div>
+          <div class="sidebar-item" onclick="openWin('booking')"><span class="si-icon">📩</span> Book Me</div>
+        </div>
+      </div>
+      <div class="finder-content">
+        <div class="socials-list">
+          <div class="social-row">
+            <div class="social-icon-box" style="background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#bc1888);">📸</div>
+            <div><div class="social-name">Instagram</div><div class="social-handle">@djmelo.official</div></div>
+            <div class="social-arrow">›</div>
+          </div>
+          <div class="social-row">
+            <div class="social-icon-box" style="background:#ff0000;">▶️</div>
+            <div><div class="social-name">YouTube</div><div class="social-handle">DJ Melo Official</div></div>
+            <div class="social-arrow">›</div>
+          </div>
+          <div class="social-row">
+            <div class="social-icon-box" style="background:#ff5500;">🎵</div>
+            <div><div class="social-name">SoundCloud</div><div class="social-handle">djmelo</div></div>
+            <div class="social-arrow">›</div>
+          </div>
+          <div class="social-row">
+            <div class="social-icon-box" style="background:#1DB954;">🎶</div>
+            <div><div class="social-name">Spotify</div><div class="social-handle">DJ Melo</div></div>
+            <div class="social-arrow">›</div>
+          </div>
+          <div class="social-row">
+            <div class="social-icon-box" style="background:#1da1f2;">🐦</div>
+            <div><div class="social-name">Twitter / X</div><div class="social-handle">@djmelo</div></div>
+            <div class="social-arrow">›</div>
+          </div>
+          <div class="social-row">
+            <div class="social-icon-box" style="background:#333;">🎧</div>
+            <div><div class="social-name">Mixcloud</div><div class="social-handle">/djmelo</div></div>
+            <div class="social-arrow">›</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="finder-statusbar">6 links</div>
+  </div>
+
+  <!-- ABOUT WINDOW -->
+  <div class="finder-window" id="win-about" style="width:560px; top:65px; left:250px; z-index:100;">
+    <div class="finder-titlebar" data-win="about">
+      <div class="traffic-lights">
+        <div class="tl tl-red" onclick="closeWin('about')">✕</div>
+        <div class="tl tl-yellow">–</div>
+        <div class="tl tl-green">+</div>
+      </div>
+      <div class="finder-title">About Melo</div>
+      <div class="finder-path">~/djmelo/about.txt</div>
+    </div>
+    <div style="display:flex; flex:1; overflow:hidden;">
+      <div class="finder-sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-heading">Favourites</div>
+          <div class="sidebar-item" onclick="openWin('home')"><span class="si-icon">🏠</span> Home</div>
+          <div class="sidebar-item" onclick="openWin('mixes')"><span class="si-icon">🎵</span> Mixes</div>
+          <div class="sidebar-item" onclick="openWin('events')"><span class="si-icon">📅</span> Events</div>
+          <div class="sidebar-item" onclick="openWin('gallery')"><span class="si-icon">🖼</span> Gallery</div>
+          <div class="sidebar-item" onclick="openWin('socials')"><span class="si-icon">🔗</span> Socials</div>
+          <div class="sidebar-item active"><span class="si-icon">👤</span> About</div>
+          <div class="sidebar-item" onclick="openWin('booking')"><span class="si-icon">📩</span> Book Me</div>
+        </div>
+      </div>
+      <div class="finder-content">
+        <div class="about-body">
+          <div class="about-header">
+            <div class="about-avi">🎧</div>
+            <div class="about-avi-info">
+              <h2>DJ MELO</h2>
+              <p>London-based DJ & selector. Fabric resident. Rooted in afrobeats, deep house, and UK bass. Born in Peckham, playing for the world.</p>
+            </div>
+          </div>
+          <div class="about-stats">
+            <div class="astat"><div class="astat-n">8+</div><div class="astat-l">Years</div></div>
+            <div class="astat"><div class="astat-n">200+</div><div class="astat-l">Shows</div></div>
+            <div class="astat"><div class="astat-n">50K</div><div class="astat-l">Fans</div></div>
+            <div class="astat"><div class="astat-n">12</div><div class="astat-l">Releases</div></div>
+          </div>
+          <div class="about-divider"></div>
+          <p class="about-bio-text">Melo has been shaping London's underground music scene since 2018. With roots in Peckham and a sound that draws from afrobeats, deep house, and UK bass, he's become one of the city's most sought-after selectors. His residency at Fabric and international bookings speak to a global appeal built on raw talent and an unwavering connection to the dancefloor.</p>
+          <div class="skill-list">
+            <div class="sk"><div class="sk-top"><span>House</span><span class="sk-pct">98%</span></div><div class="sk-bar"><div class="sk-fill" style="width:98%"></div></div></div>
+            <div class="sk"><div class="sk-top"><span>Afrobeats</span><span class="sk-pct">95%</span></div><div class="sk-bar"><div class="sk-fill" style="width:95%"></div></div></div>
+            <div class="sk"><div class="sk-top"><span>Techno</span><span class="sk-pct">87%</span></div><div class="sk-bar"><div class="sk-fill" style="width:87%"></div></div></div>
+            <div class="sk"><div class="sk-top"><span>UK Bass</span><span class="sk-pct">92%</span></div><div class="sk-bar"><div class="sk-fill" style="width:92%"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="finder-statusbar">about.txt · 1 item</div>
+  </div>
+
+  <!-- BOOKING WINDOW -->
+  <div class="finder-window" id="win-booking" style="width:540px; top:75px; left:270px; z-index:100;">
+    <div class="finder-titlebar" data-win="booking">
+      <div class="traffic-lights">
+        <div class="tl tl-red" onclick="closeWin('booking')">✕</div>
+        <div class="tl tl-yellow">–</div>
+        <div class="tl tl-green">+</div>
+      </div>
+      <div class="finder-title">Book DJ Melo</div>
+      <div class="finder-path">~/djmelo/booking</div>
+    </div>
+    <div style="display:flex; flex:1; overflow:hidden;">
+      <div class="finder-sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-heading">Favourites</div>
+          <div class="sidebar-item" onclick="openWin('home')"><span class="si-icon">🏠</span> Home</div>
+          <div class="sidebar-item" onclick="openWin('mixes')"><span class="si-icon">🎵</span> Mixes</div>
+          <div class="sidebar-item" onclick="openWin('events')"><span class="si-icon">📅</span> Events</div>
+          <div class="sidebar-item" onclick="openWin('gallery')"><span class="si-icon">🖼</span> Gallery</div>
+          <div class="sidebar-item" onclick="openWin('socials')"><span class="si-icon">🔗</span> Socials</div>
+          <div class="sidebar-item" onclick="openWin('about')"><span class="si-icon">👤</span> About</div>
+          <div class="sidebar-item active"><span class="si-icon">📩</span> Book Me</div>
+        </div>
+      </div>
+      <div class="finder-content">
+        <div class="booking-body">
+          <div class="booking-top">
+            <div class="binfo-card"><div class="bi-icon">✉️</div><div class="bi-label">Email</div><div class="bi-val">book@djmelo.com</div></div>
+            <div class="binfo-card"><div class="bi-icon">📞</div><div class="bi-label">Manager</div><div class="bi-val">+44 7700 900 000</div></div>
+          </div>
+          <div class="bform">
+            <div class="brow">
+              <div class="bgroup"><label>Your Name</label><input type="text" placeholder="John Smith"></div>
+              <div class="bgroup"><label>Email</label><input type="email" placeholder="you@example.com"></div>
+            </div>
+            <div class="brow">
+              <div class="bgroup"><label>Event Date</label><input type="date"></div>
+              <div class="bgroup"><label>Event Type</label>
+                <select>
+                  <option>Club Night</option><option>Private Party</option><option>Festival</option><option>Corporate</option>
+                </select>
+              </div>
+            </div>
+            <div class="bgroup"><label>Message</label><textarea placeholder="Tell Melo about your event..."></textarea></div>
+            <button class="bsubmit">Send Booking Request →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="finder-statusbar">booking@djmelo.com</div>
+  </div>
+
+  <!-- PHOTO PREVIEW WINDOW -->
+  <div class="preview-window" id="previewWin" style="top:120px; left:600px;">
+    <div class="preview-titlebar" data-win="preview">
+      <div class="traffic-lights">
+        <div class="tl tl-red" onclick="closePreview()">✕</div>
+        <div class="tl tl-yellow">–</div>
+        <div class="tl tl-green">+</div>
+      </div>
+      <div class="preview-title" id="previewTitle">photo.jpg</div>
+    </div>
+    <div class="preview-content" id="previewContent">🎧</div>
+  </div>
+
+</div>
+
+<!-- ===================== DOCK ===================== -->
+<div class="dock-wrap">
+  <div class="dock">
+
+    <!-- Home (Finder-style) -->
+    <div class="d-item" onclick="openWin('home')">
+      <div class="d-item-icon" style="background:none; box-shadow:none; border-radius:0;">
+        <svg viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg" style="border-radius:13px; overflow:hidden;">
+          <rect width="52" height="52" fill="url(#ig-finder)"/>
+          <rect x="6" y="13" width="20" height="26" rx="3" fill="#1c5fa0"/>
+          <rect x="28" y="13" width="18" height="26" rx="3" fill="white" opacity="0.9"/>
+          <ellipse cx="13" cy="24" rx="4" ry="4" fill="white"/>
+          <ellipse cx="13" cy="24" rx="2.2" ry="2.2" fill="#1a7fe8"/>
+          <ellipse cx="13" cy="24" rx="1" ry="1" fill="#111"/>
+          <ellipse cx="22" cy="24" rx="4" ry="4" fill="white"/>
+          <ellipse cx="22" cy="24" rx="2.2" ry="2.2" fill="#1a7fe8"/>
+          <ellipse cx="22" cy="24" rx="1" ry="1" fill="#111"/>
+          <path d="M10 30 Q17.5 35.5 25 30" stroke="white" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="d-tooltip">Home</div>
+      <div class="d-dot on" id="dot-home"></div>
+    </div>
+
+    <!-- Mixes (Music-style) -->
+    <div class="d-item" onclick="openWin('mixes')">
+      <div class="d-item-icon" style="background:none; box-shadow:none; border-radius:0;">
+        <svg viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg" style="border-radius:13px; overflow:hidden;">
+          <rect width="52" height="52" fill="url(#ig-music)"/>
+          <circle cx="26" cy="26" r="16" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1.2"/>
+          <circle cx="26" cy="26" r="10" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+          <path d="M22 18 L22 31" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M22 31 a4 4 0 1 0 4-4" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <rect x="22" y="17" width="9" height="3" rx="1.5" fill="white"/>
+        </svg>
+      </div>
+      <div class="d-tooltip">Mixes</div>
+      <div class="d-dot" id="dot-mixes"></div>
+    </div>
+
+    <!-- Events (Calendar-style) -->
+    <div class="d-item" onclick="openWin('events')">
+      <div class="d-item-icon" style="background:none; box-shadow:none; border-radius:0;">
+        <svg viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg" style="border-radius:13px; overflow:hidden;">
+          <rect width="52" height="52" fill="white"/>
+          <rect width="52" height="14" fill="#ff3b30"/>
+          <text x="26" y="11" text-anchor="middle" fill="white" font-size="8" font-weight="700" font-family="-apple-system,sans-serif">APR</text>
+          <text x="26" y="36" text-anchor="middle" fill="#1a1a1a" font-size="22" font-weight="700" font-family="-apple-system,sans-serif">24</text>
+          <!-- grid dots -->
+          <circle cx="14" cy="44" r="1.5" fill="#ccc"/>
+          <circle cx="26" cy="44" r="1.5" fill="#ccc"/>
+          <circle cx="38" cy="44" r="1.5" fill="#ccc"/>
+        </svg>
+      </div>
+      <div class="d-tooltip">Events</div>
+      <div class="d-dot" id="dot-events"></div>
+    </div>
+
+    <!-- Gallery (Photos-style) -->
+    <div class="d-item" onclick="openWin('gallery')">
+      <div class="d-item-icon" style="background:none; box-shadow:none; border-radius:0;">
+        <svg viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg" style="border-radius:13px; overflow:hidden;">
+          <rect width="52" height="52" fill="white"/>
+          <g transform="translate(26,26)">
+            <ellipse rx="4.5" ry="4.5" fill="#ff3b30" transform="rotate(0) translate(0,-12)"/>
+            <ellipse rx="4.5" ry="4.5" fill="#ff9500" transform="rotate(45) translate(0,-12)"/>
+            <ellipse rx="4.5" ry="4.5" fill="#ffcc00" transform="rotate(90) translate(0,-12)"/>
+            <ellipse rx="4.5" ry="4.5" fill="#4cd964" transform="rotate(135) translate(0,-12)"/>
+            <ellipse rx="4.5" ry="4.5" fill="#007aff" transform="rotate(180) translate(0,-12)"/>
+            <ellipse rx="4.5" ry="4.5" fill="#5856d6" transform="rotate(225) translate(0,-12)"/>
+            <ellipse rx="4.5" ry="4.5" fill="#ff2d55" transform="rotate(270) translate(0,-12)"/>
+            <ellipse rx="4.5" ry="4.5" fill="#ff6b35" transform="rotate(315) translate(0,-12)"/>
+          </g>
+          <circle cx="26" cy="26" r="5.5" fill="white"/>
+        </svg>
+      </div>
+      <div class="d-tooltip">Gallery</div>
+      <div class="d-dot" id="dot-gallery"></div>
+    </div>
+
+    <!-- Socials (Messages-style) -->
+    <div class="d-item" onclick="openWin('socials')">
+      <div class="d-item-icon" style="background:none; box-shadow:none; border-radius:0;">
+        <svg viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg" style="border-radius:13px; overflow:hidden;">
+          <rect width="52" height="52" fill="url(#ig-msg)"/>
+          <path d="M10 16 Q10 12 14 12 L38 12 Q42 12 42 16 L42 30 Q42 34 38 34 L28 34 L22 40 L22 34 L14 34 Q10 34 10 30 Z" fill="white"/>
+        </svg>
+      </div>
+      <div class="d-tooltip">Socials</div>
+      <div class="d-dot" id="dot-socials"></div>
+    </div>
+
+    <div class="dock-sep"></div>
+
+    <!-- About (Contacts-style) -->
+    <div class="d-item" onclick="openWin('about')">
+      <div class="d-item-icon" style="background:none; box-shadow:none; border-radius:0;">
+        <svg viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg" style="border-radius:13px; overflow:hidden;">
+          <rect width="52" height="52" fill="url(#ig-contacts)"/>
+          <circle cx="26" cy="20" r="8" fill="white"/>
+          <path d="M10 44 Q10 32 26 32 Q42 32 42 44" fill="white"/>
+        </svg>
+      </div>
+      <div class="d-tooltip">About</div>
+      <div class="d-dot" id="dot-about"></div>
+    </div>
+
+    <!-- Booking (Mail-style) -->
+    <div class="d-item" onclick="openWin('booking')">
+      <div class="d-item-icon" style="background:none; box-shadow:none; border-radius:0;">
+        <svg viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg" style="border-radius:13px; overflow:hidden;">
+          <rect width="52" height="52" fill="url(#ig-mail)"/>
+          <rect x="8" y="15" width="36" height="24" rx="3" fill="white" opacity="0.95"/>
+          <path d="M8 18 L26 30 L44 18" stroke="#4fb4ff" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="d-tooltip">Book Me</div>
+      <div class="d-dot" id="dot-booking"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Clock
+function updateClock() {
+  const now = new Date();
+  const d = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][now.getDay()];
+  const m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][now.getMonth()];
+  const h = String(now.getHours()).padStart(2,'0');
+  const min = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('clock').textContent = `${d} ${now.getDate()} ${m} ${h}:${min}`;
+}
+updateClock(); setInterval(updateClock, 1000);
+
+// Equalizer
+const eq = document.getElementById('homeEq');
+[[6,22,0.6],[14,34,0.45],[4,28,0.8],[18,36,0.5],[10,30,0.65],[3,24,0.55],[16,34,0.7],[8,26,0.48]].forEach(([a,b,d]) => {
+  const bar = document.createElement('div');
+  bar.className = 'home-bar';
+  bar.style.setProperty('--a', a+'px');
+  bar.style.setProperty('--b', b+'px');
+  bar.style.setProperty('--d', d+'s');
+  bar.style.height = a+'px';
+  eq.appendChild(bar);
+});
+
+// Window management
+let zTop = 200;
+const openWindows = new Set(['home']);
+
+function openWin(id) {
+  const win = document.getElementById('win-' + id);
+  win.classList.add('open');
+  win.style.zIndex = ++zTop;
+  const dot = document.getElementById('dot-' + id);
+  if (dot) dot.classList.add('on');
+  openWindows.add(id);
+}
+
+function closeWin(id) {
+  document.getElementById('win-' + id).classList.remove('open');
+  const dot = document.getElementById('dot-' + id);
+  if (dot) dot.classList.remove('on');
+  openWindows.delete(id);
+}
+
+openWin('home');
+
+// Drag windows
+document.querySelectorAll('.finder-titlebar, .preview-titlebar').forEach(tb => {
+  let dragging = false, ox = 0, oy = 0;
+  const win = tb.closest('.finder-window') || tb.closest('.preview-window');
+
+  tb.addEventListener('mousedown', e => {
+    if (e.target.classList.contains('tl')) return;
+    dragging = true;
+    ox = e.clientX - win.offsetLeft;
+    oy = e.clientY - win.offsetTop;
+    win.style.zIndex = ++zTop;
+    tb.style.cursor = 'grabbing';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    let nx = e.clientX - ox;
+    let ny = e.clientY - oy;
+    nx = Math.max(-win.offsetWidth + 60, Math.min(window.innerWidth - 60, nx));
+    ny = Math.max(24, Math.min(window.innerHeight - 40, ny));
+    win.style.left = nx + 'px';
+    win.style.top = ny + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    dragging = false;
+    tb.style.cursor = 'grab';
+  });
+});
+
+document.querySelectorAll('.finder-window, .preview-window').forEach(win => {
+  win.addEventListener('mousedown', () => { win.style.zIndex = ++zTop; });
+});
+
+function openPreview(emoji, filename) {
+  document.getElementById('previewContent').textContent = emoji;
+  document.getElementById('previewTitle').textContent = filename;
+  document.getElementById('previewWin').classList.add('open');
+  document.getElementById('previewWin').style.zIndex = ++zTop;
+}
+
+function closePreview() {
+  document.getElementById('previewWin').classList.remove('open');
+}
+</script>
+</body>
+</html>

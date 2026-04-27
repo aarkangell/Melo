@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DJ MELO</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=DM+Mono:ital,wght@0,400;0,500&display=swap" rel="stylesheet">
+<style>
+/* ── macOS System Font Stack ── */
+:root {
+  --sf: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif;
+  --sf-mono: "SF Mono", "Menlo", "Monaco", "DM Mono", monospace;
+  --orb: 'Orbitron', sans-serif;
+
+  --wall1: #3a9e6e;
+  --wall2: #4CAF82;
+  --wall3: #5bcb93;
+  --finder-bg: #f2f2f2;
+  --sidebar-bg: rgba(210,210,215,0.65);
+  --border: #c8c8cc;
+  --titlebar: linear-gradient(to bottom, #dddddd, #d0d0d0);
+  --toolbar: linear-gradient(to bottom, #e8e8e8, #dcdcdc);
+  --accent: #007aff;
+  --green-accent: #00e87a;
+  --text: #1c1c1e;
+  --text-mid: #636366;
+  --text-light: #aeaeb2;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: var(--sf);
+  background: linear-gradient(155deg, var(--wall1) 0%, var(--wall2) 45%, var(--wall3) 75%, var(--wall1) 100%);
+  min-height: 100vh;
+  overflow: hidden;
+  cursor: default;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background: radial-gradient(ellipse at 25% 15%, rgba(255,255,255,0.08) 0%, transparent 55%),
+              radial-gradient(ellipse at 75% 85%, rgba(0,0,0,0.1) 0%, transparent 55%);
+  pointer-events:none; z-index:0;
+}
+
+/* ══════════════ MENUBAR ══════════════ */
+.menubar {
+  position:fixed; top:0; left:0; right:0; height:24px;
+  background:rgba(0,0,0,0.28);
+  backdrop-filter:blur(40px) saturate(180%);
+  -webkit-backdrop-filter:blur(40px) saturate(180%);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 14px; z-index:9999;
+  border-bottom:1px solid rgba(0,0,0,0.18);
+}
+
+.mb-left { display:flex; align-items:center; gap:18px; }
+.mb-apple {
+  display:flex; align-items:center; color:#fff;
+}
+
+/* SVG Apple icon */
+.mb-apple svg { width:14px; height:14px; fill:#fff; }
+.mb-brand { font-family:var(--orb); font-size:11px; font-weight:700; letter-spacing:0.22em; color:var(--green-accent); }
+.mb-items { display:flex; gap:16px; font-size:13px; font-weight:400; color:rgba(255,255,255,0.88); letter-spacing:-0.01em; }
+.mb-right { display:flex; align-items:center; gap:14px; font-size:12px; color:rgba(255,255,255,0.88); font-family:var(--sf); font-weight:500; }
+.mb-right svg { width:14px; height:14px; fill:rgba(255,255,255,0.88); }
+
+/* ══════════════ FINDER WINDOW ══════════════ */
+.finder-window {
+  position:absolute;
+  background:var(--finder-bg);
+  border-radius:10px;
+  box-shadow: 0 0 0 0.5px rgba(0,0,0,0.22),
+              0 2px 1px rgba(0,0,0,0.08),
+              0 10px 40px rgba(0,0,0,0.38),
+              0 24px 60px rgba(0,0,0,0.22);
+  overflow:hidden;
+  display:none;
+  flex-direction:column;
+  animation:winOpen 0.2s cubic-bezier(0.28,0.46,0.45,0.94) forwards;
+}
+.finder-window.open { display:flex; }
+
+@keyframes winOpen {
+  from { opacity:0; transform:scale(0.93) translateY(6px); }
+  to   { opacity:1; transform:scale(1) translateY(0); }
+}
+
+/* Titlebar */
+.finder-titlebar {
+  height:38px;
+  background:var(--titlebar);
+  border-bottom:1px solid #b8b8b8;
+  display:flex; align-items:center; padding:0 12px;
+  cursor:grab; position:relative; flex-shrink:0;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.7);
+}
+.finder-titlebar:active { cursor:grabbing; }
+
+.traffic-lights { display:flex; gap:8px; align-items:center; z-index:2; }
+.tl {
+  width:13px; height:13px; border-radius:50%;
+  cursor:pointer; position:relative;
+  border:0.5px solid rgba(0,0,0,0.2);
+  display:flex; align-items:center; justify-content:center;
+  transition:filter 0.1s;
+}
+.tl svg { width:7px; height:7px; opacity:0; transition:opacity 0.1s; }
+.tl:hover svg { opacity:1; }
+.tl-red   { background:radial-gradient(circle at 35% 35%, #ff8c88, #ff5f57); }
+.tl-yellow{ background:radial-gradient(circle at 35% 35%, #ffe580, #ffbd2e); }
+.tl-green { background:radial-gradient(circle at 35% 35%, #74f07b, #28c941); }
+.tl-red:hover   { filter:brightness(0.9); }
+.tl-yellow:hover{ filter:brightness(0.9); }
+.tl-green:hover { filter:brightness(0.9); }
+
+.finder-title {
+  position:absolute; left:50%; transform:translateX(-50%);
+  font-size:13px; font-weight:600; color:#3a3a3a;
+  letter-spacing:-0.01em; pointer-events:none; white-space:nowrap;
+}
+
+.finder-path {
+  margin-left:auto;
+  font-family:var(--sf-mono);
+  font-size:10px; color:#999;
+  background:rgba(0,0,0,0.06);
+  padding:2px 8px; border-radius:4px;
+  border:1px solid rgba(0,0,0,0.07);
+}
+
+/* Toolbar */
+.finder-toolbar {
+  height:38px;
+  background:var(--toolbar);
+  border-bottom:1px solid #c4c4c4;
+  display:flex; align-items:center; padding:0 12px; gap:8px;
+  flex-shrink:0;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.55);
+}
+
+.tb-btn {
+  width:28px; height:22px; border-radius:5px;
+  background:rgba(255,255,255,0.55);
+  border:1px solid rgba(0,0,0,0.14);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; transition:background 0.1s;
+  box-shadow:0 1px 0 rgba(255,255,255,0.6) inset;
+}
+.tb-btn:hover { background:rgba(255,255,255,0.82); }
+.tb-btn svg { width:13px; height:13px; fill:#555; }
+
+.tb-sep { width:1px; height:20px; background:rgba(0,0,0,0.14); margin:0 2px; }
+
+.tb-search {
+  margin-left:auto; height:22px; width:150px;
+  background:rgba(255,255,255,0.72);
+  border:1px solid rgba(0,0,0,0.2); border-radius:5px;
+  display:flex; align-items:center; padding:0 8px; gap:5px;
+  font-size:12px; color:#999; font-family:var(--sf);
+}
+.tb-search svg { width:11px; height:11px; fill:#aaa; flex-shrink:0; }
+
+/* Sidebar */
+.finder-sidebar {
+  width:176px;
+  background:rgba(215,215,220,0.72);
+  border-right:1px solid #c0c0c4;
+  padding:10px 0; flex-shrink:0; overflow-y:auto;
+  backdrop-filter:blur(20px);
+}
+
+.sb-section { padding:0 0 8px; }
+
+.sb-heading {
+  font-size:11px; font-weight:700; color:#888;
+  letter-spacing:0.04em; padding:0 14px 5px;
+  text-transform:uppercase;
+}
+
+.sb-item {
+  display:flex; align-items:center; gap:7px;
+  padding:5px 10px; margin:0 4px;
+  font-size:13px; font-weight:400; color:#2a2a2a;
+  border-radius:6px; cursor:pointer; transition:background 0.1s;
+  letter-spacing:-0.01em;
+}
+.sb-item:hover { background:rgba(0,0,0,0.07); }
+.sb-item.active { background:#007aff; color:#fff; }
+.sb-item.active svg { fill:#fff !important; }
+.sb-item.active .sb-count { background:rgba(255,255,255,0.25); color:#fff; }
+
+.sb-icon { width:18px; height:18px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.sb-icon svg { width:16px; height:16px; }
+
+.sb-count {
+  margin-left:auto; background:rgba(0,0,0,0.12); color:#666;
+  font-size:11px; padding:1px 6px; border-radius:8px;
+  font-family:var(--sf-mono); font-weight:500;
+}
+
+/* Content */
+.finder-content { flex:1; overflow-y:auto; padding:14px; scrollbar-width:thin; scrollbar-color:rgba(0,0,0,0.18) transparent; }
+
+/* Status bar */
+.finder-statusbar {
+  height:20px; background:#e8e8e8; border-top:1px solid #c8c8c8;
+  display:flex; align-items:center; padding:0 14px;
+  font-size:11px; color:#888; font-family:var(--sf); flex-shrink:0;
+}
+
+/* ══════════════ HOME PANEL ══════════════ */
+.home-inner {
+  flex:1; overflow-y:auto; display:flex; align-items:center; justify-content:center;
+}
+
+.home-content {
+  display:flex; flex-direction:column; align-items:center;
+  text-align:center; gap:16px; padding:28px 24px;
+}
+
+.home-vinyl {
+  width:108px; height:108px; border-radius:50%;
+  background:repeating-radial-gradient(circle, #111 0, #111 2px, #1e1e1e 2px, #1e1e1e 5px);
+  position:relative; animation:spin 5s linear infinite;
+  box-shadow:0 6px 24px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.05);
+}
+.home-vinyl::after {
+  content:''; position:absolute; inset:33%; border-radius:50%;
+  background:linear-gradient(135deg,var(--green-accent),#007a40);
+  box-shadow:0 0 14px rgba(0,232,122,0.5);
+}
+
+@keyframes spin { to { transform:rotate(360deg); } }
+
+.home-name { font-family:var(--orb); font-size:44px; font-weight:900; letter-spacing:0.15em; color:#1c1c1e; line-height:1; }
+.home-sub { font-size:11px; font-weight:600; letter-spacing:0.3em; text-transform:uppercase; color:#007aff; }
+
+.home-eq { display:flex; align-items:flex-end; gap:3px; height:28px; }
+.h-bar { width:5px; border-radius:3px 3px 0 0; background:linear-gradient(to top, #007aff, #5ac8ff); animation:eq var(--d) ease-in-out infinite alternate; }
+@keyframes eq { from { height:var(--a); } to { height:var(--b); } }
+
+.home-tags { display:flex; gap:7px; flex-wrap:wrap; justify-content:center; }
+.htag {
+  font-size:11px; padding:4px 11px; border-radius:12px;
+  background:rgba(0,0,0,0.07); color:#555;
+  border:1px solid rgba(0,0,0,0.1); font-family:var(--sf);
+}
+
+/* ══════════════ LIST VIEW (Mixes) ══════════════ */
+.list-view { display:flex; flex-direction:column; }
+.list-header {
+  display:grid; grid-template-columns:1fr 80px 90px;
+  padding:5px 12px; border-bottom:1px solid #d0d0d0;
+  font-size:11px; font-weight:600; color:#888;
+  background:#e8e8e8; letter-spacing:0.01em;
+}
+.list-row {
+  display:grid; grid-template-columns:1fr 80px 90px;
+  padding:7px 12px; border-bottom:1px solid rgba(0,0,0,0.06);
+  font-size:13px; color:#2a2a2a; cursor:pointer; align-items:center;
+  transition:background 0.1s; letter-spacing:-0.01em;
+}
+.list-row:hover { background:rgba(0,122,255,0.1); }
+.list-row.playing { background:rgba(0,200,100,0.1); color:#006633; }
+.l-name { display:flex; align-items:center; gap:8px; }
+.l-icon { width:20px; height:20px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.l-icon svg { width:18px; height:18px; }
+.l-dur { font-family:var(--sf-mono); color:#888; font-size:11px; font-weight:500; }
+.l-tag {
+  font-size:10px; background:rgba(0,122,255,0.1); color:#007aff;
+  padding:2px 8px; border-radius:8px; font-family:var(--sf-mono);
+  font-weight:600; display:inline-block;
+}
+.list-row.playing .l-tag { background:rgba(0,180,80,0.12); color:#006633; }
+
+/* ══════════════ EVENTS ══════════════ */
+.events-list { display:flex; flex-direction:column; gap:10px; }
+.event-row {
+  display:flex; align-items:center; gap:14px;
+  padding:13px 14px;
+  background:rgba(255,255,255,0.65);
+  border-radius:9px; border:1px solid rgba(0,0,0,0.09);
+  cursor:pointer; transition:all 0.15s;
+}
+.event-row:hover { background:#fff; box-shadow:0 4px 16px rgba(0,0,0,0.12); transform:translateY(-1px); }
+.ev-date { text-align:center; min-width:44px; padding:7px 8px; background:#ff3b30; border-radius:9px; color:#fff; }
+.ev-day { font-size:20px; font-weight:800; line-height:1; font-family:var(--sf); }
+.ev-month { font-size:9px; text-transform:uppercase; letter-spacing:0.12em; opacity:0.85; font-weight:600; }
+.ev-info { flex:1; }
+.ev-name { font-size:13px; font-weight:600; color:#1c1c1e; margin-bottom:3px; letter-spacing:-0.01em; }
+.ev-venue { font-size:11px; color:#888; display:flex; align-items:center; gap:4px; }
+.ev-venue svg { width:10px; height:10px; fill:#aaa; }
+.ev-tag { font-size:10px; background:rgba(0,0,0,0.07); color:#555; padding:3px 8px; border-radius:6px; font-family:var(--sf-mono); font-weight:500; }
+.ev-ticket {
+  background:#007aff; color:#fff; border:none;
+  padding:7px 14px; border-radius:15px; font-size:12px; font-weight:600;
+  cursor:pointer; font-family:var(--sf); letter-spacing:-0.01em; white-space:nowrap;
+}
+
+/* ══════════════ GALLERY ══════════════ */
+.photo-thumb {
+  border-radius:7px; overflow:hidden; cursor:pointer; position:relative;
+  display:flex; align-items:center; justify-content:center;
+  border:2px solid transparent; transition:all 0.15s;
+}
+.photo-thumb:hover { border-color:#007aff; transform:scale(1.02); }
+.photo-label { font-size:10px; color:#888; font-family:var(--sf-mono); margin-top:3px; text-align:center; }
+.photo-col { display:flex; flex-direction:column; gap:4px; }
+.pt-emoji { font-size:32px; pointer-events:none; }
+
+/* ══════════════ SOCIALS ══════════════ */
+.socials-list { display:flex; flex-direction:column; gap:1px; }
+.social-row {
+  display:flex; align-items:center; gap:12px;
+  padding:11px 12px; border-radius:7px; cursor:pointer;
+  transition:background 0.1s; border-bottom:1px solid rgba(0,0,0,0.06);
+}
+.social-row:hover { background:rgba(0,122,255,0.08); }
+.s-iconbox { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.s-iconbox svg { width:20px; height:20px; fill:#fff; }
+.s-name { font-size:13px; font-weight:600; color:#1c1c1e; letter-spacing:-0.01em; }
+.s-handle { font-size:11px; color:#888; margin-top:1px; font-family:var(--sf-mono); }
+.s-arrow { margin-left:auto; color:#c7c7cc; font-size:18px; font-weight:300; }
+
+/* ══════════════ ABOUT ══════════════ */
+.about-header { display:flex; gap:16px; margin-bottom:18px; align-items:flex-start; }
+.about-avi {
+  width:72px; height:72px; border-radius:18px; flex-shrink:0;
+  background:linear-gradient(135deg,var(--green-accent),#007a40);
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 4px 14px rgba(0,200,100,0.3);
+}
+.about-avi svg { width:40px; height:40px; fill:#fff; }
+.about-avi-info h2 { font-family:var(--orb); font-size:20px; font-weight:700; color:#1c1c1e; margin-bottom:5px; }
+.about-avi-info p { font-size:13px; color:#636366; line-height:1.6; font-weight:400; }
+.about-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:16px; }
+.astat { text-align:center; padding:10px 6px; background:rgba(255,255,255,0.72); border-radius:8px; border:1px solid rgba(0,0,0,0.08); }
+.astat-n { font-size:19px; font-weight:800; font-family:var(--sf); color:#007aff; letter-spacing:-0.02em; }
+.astat-l { font-size:10px; color:#888; margin-top:2px; letter-spacing:0.04em; text-transform:uppercase; font-weight:600; }
+.about-divider { height:1px; background:#e2e2e7; margin:14px 0; }
+.about-bio-text { font-size:13px; line-height:1.7; color:#3a3a3c; font-weight:400; }
+.skill-list { margin-top:16px; display:flex; flex-direction:column; gap:11px; }
+.sk-top { display:flex; justify-content:space-between; font-size:12px; color:#555; margin-bottom:5px; font-weight:500; }
+.sk-pct { font-family:var(--sf-mono); color:#007aff; font-size:11px; font-weight:600; }
+.sk-bar { height:5px; background:#e2e2e7; border-radius:3px; overflow:hidden; }
+.sk-fill { height:100%; background:linear-gradient(90deg,#007aff,#5ac8ff); border-radius:3px; }
+
+/* ══════════════ BOOKING ══════════════ */
+.booking-body { display:flex; flex-direction:column; gap:14px; }
+.booking-top { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.binfo-card { padding:14px; background:rgba(255,255,255,0.72); border-radius:9px; border:1px solid rgba(0,0,0,0.08); text-align:center; }
+.bi-icon { display:flex; justify-content:center; margin-bottom:6px; }
+.bi-icon svg { width:24px; height:24px; }
+.bi-label { font-size:10px; color:#888; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:3px; font-weight:600; }
+.bi-val { font-size:12px; font-weight:600; color:#007aff; font-family:var(--sf-mono); }
+.bform { display:flex; flex-direction:column; gap:10px; }
+.brow { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.bgroup { display:flex; flex-direction:column; gap:4px; }
+.bgroup label { font-size:11px; color:#888; text-transform:uppercase; letter-spacing:0.07em; font-weight:600; }
+.bgroup input, .bgroup select, .bgroup textarea {
+  background:rgba(255,255,255,0.82); border:1px solid #c8c8cc;
+  border-radius:7px; padding:8px 10px; font-size:13px; color:#1c1c1e;
+  outline:none; font-family:var(--sf); font-weight:400; transition:border-color 0.15s;
+}
+.bgroup input:focus, .bgroup select:focus, .bgroup textarea:focus { border-color:#007aff; box-shadow:0 0 0 3px rgba(0,122,255,0.14); }
+.bgroup textarea { height:62px; resize:none; }
+.bsubmit {
+  background:#007aff; color:#fff; border:none; border-radius:9px;
+  padding:12px; font-size:13px; font-weight:600; cursor:pointer;
+  font-family:var(--sf); letter-spacing:-0.01em; transition:all 0.15s;
+}
+.bsubmit:hover { background:#0067e0; box-shadow:0 4px 14px rgba(0,122,255,0.38); }
+
+/* ══════════════ PREVIEW WINDOW ══════════════ */
+.preview-window {
+  position:absolute;
+  background:#1c1c1e; border-radius:10px; overflow:hidden;
+  box-shadow:0 20px 60px rgba(0,0,0,0.65), 0 0 0 0.5px rgba(255,255,255,0.08);
+  display:none; border:none; z-index:5000;
+}
+.preview-window.open { display:block; }
+.preview-titlebar {
+  height:30px; background:#2c2c2e;
+  display:flex; align-items:center; padding:0 12px; gap:7px;
+  cursor:grab; border-bottom:1px solid #111;
+}
+.preview-title { margin-left:8px; font-size:11px; color:#888; font-family:var(--sf-mono); }
+.preview-content { width:310px; height:270px; display:flex; align-items:center; justify-content:center; font-size:72px; background:#111; }
+
+/* ══════════════ DESKTOP FOLDER ICONS ══════════════ */
+.desktop-icons { position:fixed; right:18px; top:40px; display:flex; flex-direction:column; gap:4px; z-index:2; }
+.d-icon {
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  cursor:pointer; padding:8px 6px; border-radius:7px; width:78px; text-align:center;
+  transition:background 0.1s;
+}
+.d-icon:hover { background:rgba(255,255,255,0.18); }
+.d-icon svg { width:54px; height:46px; }
+.d-icon-label { font-size:11px; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,0.55); line-height:1.25; }
+
+/* ══════════════ NOW PLAYING ══════════════ */
+.now-playing {
+  position:fixed; top:36px; left:18px; width:196px;
+  background:rgba(28,28,30,0.88); backdrop-filter:blur(24px);
+  border-radius:12px; border:1px solid rgba(255,255,255,0.08);
+  padding:14px; z-index:100; box-shadow:0 8px 32px rgba(0,0,0,0.42);
+}
+.np-label { font-size:9px; letter-spacing:0.22em; text-transform:uppercase; color:var(--green-accent); margin-bottom:10px; font-family:var(--sf-mono); font-weight:600; display:flex; align-items:center; gap:5px; }
+.np-dot { width:6px; height:6px; border-radius:50%; background:var(--green-accent); animation:blink 1.4s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.np-vinyl { width:60px; height:60px; border-radius:50%; background:repeating-radial-gradient(circle,#222 0,#222 2px,#333 2px,#333 4px); margin:0 auto 10px; animation:spin 4s linear infinite; position:relative; }
+.np-vinyl::after { content:''; position:absolute; inset:32%; border-radius:50%; background:var(--green-accent); }
+.np-track { font-size:11px; font-weight:600; color:#fff; margin-bottom:2px; text-align:center; font-family:var(--sf); }
+.np-sub { font-size:10px; color:#636366; text-align:center; margin-bottom:10px; font-family:var(--sf); }
+.np-progress { height:3px; background:#3a3a3c; border-radius:2px; margin-bottom:10px; }
+.np-prog-fill { width:62%; height:100%; background:var(--green-accent); border-radius:2px; }
+.np-controls { display:flex; justify-content:center; gap:18px; }
+.np-controls svg { width:16px; height:16px; fill:#aeaeb2; cursor:pointer; transition:fill 0.15s; }
+.np-controls svg:hover { fill:#fff; }
+
+/* ══════════════ DOCK ══════════════ */
+.dock-wrap { position:fixed; bottom:8px; left:50%; transform:translateX(-50%); z-index:9999; }
+.dock {
+  display:flex; align-items:flex-end; gap:6px; padding:8px 12px;
+  background:rgba(255,255,255,0.2);
+  backdrop-filter:blur(40px) saturate(220%);
+  -webkit-backdrop-filter:blur(40px) saturate(220%);
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,0.42);
+  box-shadow: 0 0 0 0.5px rgba(0,0,0,0.22),
+              0 8px 32px rgba(0,0,0,0.32),
+              inset 0 1px 0 rgba(255,255,255,0.55);
+}
+
+.d-item { display:flex; flex-direction:column; align-items:center; position:relative; cursor:pointer; transition:transform 0.22s cubic-bezier(0.34,1.56,0.64,1); }
+.d-item:hover { transform:translateY(-16px) scale(1.28); }
+.d-item:hover .d-tooltip { opacity:1; }
+
+/* Squircle icon container */
+.d-item-icon {
+  width:54px; height:54px; border-radius:13.5px;
+  display:flex; align-items:center; justify-content:center;
+  position:relative; overflow:hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.28),
+              0 0 0 0.5px rgba(0,0,0,0.15),
+              inset 0 1px 0 rgba(255,255,255,0.35);
+}
+
+/* Gloss overlay on dock icons */
+.d-item-icon::after {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:55%;
+  background:linear-gradient(to bottom, rgba(255,255,255,0.32), rgba(255,255,255,0));
+  border-radius:13.5px 13.5px 0 0;
+  pointer-events:none;
+}
+
+.d-item-icon svg { width:32px; height:32px; position:relative; z-index:1; }
+
+.d-tooltip {
+  position:absolute; bottom:calc(100% + 14px); left:50%; transform:translateX(-50%);
+  background:rgba(24,24,24,0.82); color:#fff; font-size:12px; font-weight:600;
+  padding:4px 10px; border-radius:6px; white-space:nowrap; opacity:0;
+  pointer-events:none; transition:opacity 0.14s; font-family:var(--sf);
+  box-shadow:0 2px 8px rgba(0,0,0,0.3);
+}
+
+.d-dot { width:4px; height:4px; border-radius:50%; background:rgba(30,30,30,0.6); margin-top:4px; opacity:0; transition:opacity 0.2s; }
+.d-dot.on { opacity:1; }
+
+.dock-sep { width:1px; height:44px; background:rgba(0,0,0,0.18); align-self:center; margin:0 4px; }
+</style>
+</head>
+<body>
+
+<!-- ══ SVG ICON DEFS (reusable symbols) ══ -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Apple logo -->
+    <symbol id="ico-apple" viewBox="0 0 14 14">
+      <path d="M11.06 7.46c-.02-1.88 1.54-2.78 1.6-2.83-1.68-2.45-2.96-2.03-3.67-2.09-1.55-.16-3.04.92-3.83.92-.8 0-2.02-.9-3.33-.87C.23 2.63-.97 3.74-1.62 5.2c-1.3 2.95.27 7.3 1.93 9.69.64.94 1.4 1.99 2.4 1.95 1-.04 1.37-.63 2.58-.63 1.2 0 1.53.63 2.6.61 1.04-.02 1.7-.96 2.33-1.9.74-1.09 1.04-2.15 1.05-2.2-.02-.01-2.02-.77-2.21-3.26z"/>
+      <path d="M8.3 2.55c.53-.64.89-1.53.79-2.42-.77.03-1.7.51-2.25 1.15-.5.57-.93 1.49-.81 2.36.86.07 1.74-.44 2.27-1.09z"/>
+    </symbol>
+    <!-- Headphones -->
+    <symbol id="ico-headphones" viewBox="0 0 24 24">
+      <path d="M12 3a9 9 0 0 0-9 9v4a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H5.1A7 7 0 0 1 19 12h-2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-4a9 9 0 0 0-9-9z"/>
+    </symbol>
+    <!-- Music note -->
+    <symbol id="ico-music" viewBox="0 0 24 24">
+      <path d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm12-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <!-- Calendar -->
+    <symbol id="ico-calendar" viewBox="0 0 24 24">
+      <rect x="3" y="4" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M16 2v4M8 2v4M3 10h18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <text x="12" y="19" text-anchor="middle" font-size="7" font-weight="700" fill="currentColor" font-family="-apple-system,sans-serif">02</text>
+    </symbol>
+    <!-- Photo / image -->
+    <symbol id="ico-photo" viewBox="0 0 24 24">
+      <rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="2"/>
+      <circle cx="8.5" cy="8.5" r="1.5"/>
+      <path d="M21 15l-5-5L5 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <!-- Link / chain -->
+    <symbol id="ico-link" viewBox="0 0 24 24">
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <!-- Person -->
+    <symbol id="ico-person" viewBox="0 0 24 24">
+      <circle cx="12" cy="7" r="4" fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <!-- Envelope / mail -->
+    <symbol id="ico-mail" viewBox="0 0 24 24">
+      <rect x="2" y="4" width="20" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M2 7l10 7 10-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <!-- Home -->
+    <symbol id="ico-home" viewBox="0 0 24 24">
+      <path d="M3 12l9-9 9 9M5 10v9a1 1 0 0 0 1 1h4v-5h4v5h4a1 1 0 0 0 1-1v-9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <!-- Play -->
+    <symbol id="ico-play" viewBox="0 0 24 24">
+      <polygon points="5,3 19,12 5,21" fill="currentColor"/>
+    </symbol>
+    <!-- Back arrow -->
+    <symbol id="ico-back" viewBox="0 0 24 24">
+      <path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <!-- Forward arrow -->
+    <symbol id="ico-fwd" viewBox="0 0 24 24">
+      <path d="M9 18l6-6-6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <!-- Grid -->
+    <symbol id="ico-grid" viewBox="0 0 24 24">
+      <rect x="3" y="3" width="7" height="7" rx="1" fill="currentColor" opacity="0.8"/>
+      <rect x="14" y="3" width="7" height="7" rx="1" fill="currentColor" opacity="0.8"/>
+      <rect x="3" y="14" width="7" height="7" rx="1" fill="currentColor" opacity="0.8"/>
+      <rect x="14" y="14" width="7" height="7" rx="1" fill="currentColor" opacity="0.8"/>
+    </symbol>
+    <!-- List -->
+    <symbol id="ico-list" viewBox="0 0 24 24">
+      <line x1="8" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <line x1="8" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <line x1="8" y1="18" x2="21" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="4" cy="6" r="1.5" fill="currentColor"/>
+      <circle cx="4" cy="12" r="1.5" fill="currentColor"/>
+      <circle cx="4" cy="18" r="1.5" fill="currentColor"/>
+    </symbol>
+    <!-- Search -->
+    <symbol id="ico-search" viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
+      <line x1="16.5" y1="16.5" x2="22" y2="22" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+    </symbol>
+    <!-- Battery -->
+    <symbol id="ico-battery" viewBox="0 0 22 12">
+      <rect x="0" y="1" width="18" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"/>
+      <rect x="18.8" y="3.5" width="2" height="5" rx="1" fill="currentColor"/>
+      <rect x="1.5" y="2.5" width="13" height="7" rx="1.2" fill="currentColor"/>
+    </symbol>
+    <!-- Wifi -->
+    <symbol id="ico-wifi" viewBox="0 0 24 24">
+      <path d="M1.5 8.5C6 4 10.6 2 12 2s6 2 10.5 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <path d="M5 12.5C7.5 10 9.5 9 12 9s4.5 1 7 3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <path d="M8.5 16c1-1 2-1.5 3.5-1.5s2.5.5 3.5 1.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="12" cy="20" r="1.5" fill="currentColor"/>
+    </symbol>
+    <!-- Play/skip prev -->
+    <symbol id="ico-prev" viewBox="0 0 24 24">
+      <polygon points="19,5 9,12 19,19" fill="currentColor"/>
+      <rect x="5" y="5" width="2.5" height="14" rx="1" fill="currentColor"/>
+    </symbol>
+    <!-- Skip next -->
+    <symbol id="ico-next" viewBox="0 0 24 24">
+      <polygon points="5,5 15,12 5,19" fill="currentColor"/>
+      <rect x="16.5" y="5" width="2.5" height="14" rx="1" fill="currentColor"/>
+    </symbol>
+    <!-- Pause -->
+    <symbol id="ico-pause" viewBox="0 0 24 24">
+      <rect x="5" y="4" width="4" height="16" rx="1.5" fill="currentColor"/>
+      <rect x="15" y="4" width="4" height="16" rx="1.5" fill="currentColor"/>
+    </symbol>
+    <!-- Map pin -->
+    <symbol id="ico-pin" viewBox="0 0 24 24">
+      <path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7z" fill="none" stroke="currentColor" stroke-width="2"/>
+      <circle cx="12" cy="9" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/>
+    </symbol>
+    <!-- Instagram -->
+    <symbol id="ico-ig" viewBox="0 0 24 24">
+      <rect x="2" y="2" width="20" height="20" rx="5" fill="none" stroke="currentColor" stroke-width="2"/>
+      <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/>
+      <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor"/>
+    </symbol>
+    <!-- YouTube -->
+    <symbol id="ico-yt" viewBox="0 0 24 24">
+      <path d="M22.5 6.5A2.8 2.8 0 0 0 20.5 4.5C18.8 4 12 4 12 4s-6.8 0-8.5.5A2.8 2.8 0 0 0 1.5 6.5C1 8.2 1 12 1 12s0 3.8.5 5.5A2.8 2.8 0 0 0 3.5 19.5C5.2 20 12 20 12 20s6.8 0 8.5-.5a2.8 2.8 0 0 0 2-2C23 15.8 23 12 23 12s0-3.8-.5-5.5z" fill="currentColor"/>
+      <polygon points="10,8.5 16,12 10,15.5" fill="#111"/>
+    </symbol>
+    <!-- Soundcloud wave -->
+    <symbol id="ico-sc" viewBox="0 0 24 24">
+      <path d="M1 17.5c0 1.1.9 2 2 2 1.1 0 2-.9 2-2v-7c0-1.1-.9-2-2-2-1.1 0-2 .9-2 2v7zm4.5 1c0 .8.7 1.5 1.5 1.5s1.5-.7 1.5-1.5V14c0-.8-.7-1.5-1.5-1.5S5.5 13.2 5.5 14v4.5zm4 .5c0 .8.7 1.5 1.5 1.5s1.5-.7 1.5-1.5V11c0-.8-.7-1.5-1.5-1.5S9.5 10.2 9.5 11v8zm4 0c0 .8.7 1.5 1.5 1.5s1.5-.7 1.5-1.5V9.5C16 8.7 15.3 8 14.5 8S13 8.7 13 9.5V19zm4 0c0 .8.7 1.5 1.5 1.5s1.5-.7 1.5-1.5V8c0-3.3-2.7-6-6-6C12 2 10.2 2.8 9 4.1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </symbol>
+    <!-- Spotify -->
+    <symbol id="ico-spotify" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M7 16.5c3.5-1 6.5-.5 10 1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M6.5 13c4-1.5 7.5-.5 11.5 1.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M6 9.5c4.5-1.5 8-.5 12 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </symbol>
+    <!-- X / Twitter -->
+    <symbol id="ico-x" viewBox="0 0 24 24">
+      <path d="M4 4l16 16M20 4L4 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+    </symbol>
+    <!-- Mixcloud headset wave -->
+    <symbol id="ico-mix" viewBox="0 0 24 24">
+      <path d="M12 3a8 8 0 0 0-8 8v3a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2v-1a5 5 0 0 1 10 0v1a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a8 8 0 0 0-8-8z" fill="none" stroke="currentColor" stroke-width="2"/>
+    </symbol>
+    <!-- macOS folder (blue) -->
+    <symbol id="ico-folder" viewBox="0 0 54 46">
+      <path d="M0 10 Q0 6 4 6L22 6 Q24 6 25 8L27 12 L50 12 Q54 12 54 16L54 42 Q54 46 50 46L4 46 Q0 46 0 42Z" fill="url(#folderGrad)"/>
+      <path d="M0 6 Q0 2 4 2L20 2 Q22 2 23 4L25 8 L4 8 Q0 8 0 12Z" fill="url(#folderTabGrad)"/>
+      <defs>
+        <linearGradient id="folderGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#6ec6f7"/>
+          <stop offset="100%" stop-color="#3ea0f0"/>
+        </linearGradient>
+        <linearGradient id="folderTabGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#7fd0ff"/>
+          <stop offset="100%" stop-color="#5ab8f8"/>
+        </linearGradient>
+      </defs>
+    </symbol>
+    <!-- Close X for traffic light -->
+    <symbol id="tl-x" viewBox="0 0 8 8">
+      <line x1="2" y1="2" x2="6" y2="6" stroke="#6e0904" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="6" y1="2" x2="2" y2="6" stroke="#6e0904" stroke-width="1.5" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="tl-min" viewBox="0 0 8 8">
+      <line x1="2" y1="4" x2="6" y2="4" stroke="#7d5000" stroke-width="1.5" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="tl-max" viewBox="0 0 8 8">
+      <polyline points="2,5 2,2 5,2" fill="none" stroke="#006600" stroke-width="1.4" stroke-linecap="round"/>
+      <polyline points="3,6 6,6 6,3" fill="none" stroke="#006600" stroke-width="1.4" stroke-linecap="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ══ MENUBAR ══ -->
+<div class="menubar">
+  <div class="mb-left">
+    <span class="mb-apple">
+      <svg viewBox="0 0 14 17" fill="#fff" xmlns="http://www.w3.org/2000/svg" width="13" height="15">
+        <path d="M13.2 12.1c-.3.7-.6 1.3-1 1.9-.5.8-1 1.3-1.5 1.4-.4.1-.9 0-1.5-.3-.6-.3-1.1-.4-1.7-.4-.6 0-1.1.1-1.7.4-.6.3-1 .4-1.4.4-.6 0-1.1-.5-1.6-1.4-.5-.8-.9-1.8-1.2-2.9-.3-1.2-.5-2.3-.5-3.3 0-1.2.3-2.3.8-3.1.4-.7 1-1.2 1.8-1.6.7-.4 1.5-.6 2.4-.6.5 0 1.1.1 1.8.4.7.3 1.1.4 1.3.4.2 0 .7-.2 1.5-.5.8-.3 1.4-.4 2-.3 1.4.1 2.5.8 3.2 2-1.2.7-1.8 1.8-1.8 3.1 0 1 .4 1.9 1.1 2.6.3.3.7.6 1.1.8l-.3.5zM9.8 1c0 .8-.3 1.5-.8 2.2-.6.8-1.4 1.2-2.2 1.1 0-.1 0-.2 0-.4 0-.8.3-1.6.9-2.2.3-.3.6-.6 1.1-.8.4-.2.8-.3 1.1-.3l-.1.4z"/>
+      </svg>
+    </span>
+    <span class="mb-brand">MELO</span>
+    <div class="mb-items">
+      <span>Finder</span><span>File</span><span>Edit</span><span>View</span><span>Go</span><span>Window</span><span>Help</span>
+    </div>
+  </div>
+  <div class="mb-right">
+    <svg viewBox="0 0 22 12"><use href="#ico-battery"/></svg>
+    <svg viewBox="0 0 24 24"><use href="#ico-wifi"/></svg>
+    <span id="clock" style="font-family:var(--sf);font-weight:500;font-size:12px;">Thu 23 Apr 22:25</span>
+  </div>
+</div>
+
+<!-- ══ NOW PLAYING ══ -->
+<div class="now-playing">
+  <div class="np-label"><div class="np-dot"></div> Now Playing</div>
+  <div class="np-vinyl"></div>
+  <div class="np-track">Late Night Frequencies</div>
+  <div class="np-sub">DJ Melo · Vol.4</div>
+  <div class="np-progress"><div class="np-prog-fill"></div></div>
+  <div class="np-controls">
+    <svg viewBox="0 0 24 24"><use href="#ico-prev"/></svg>
+    <svg viewBox="0 0 24 24"><use href="#ico-pause"/></svg>
+    <svg viewBox="0 0 24 24"><use href="#ico-next"/></svg>
+  </div>
+</div>
+
+<!-- ══ DESKTOP FOLDER ICONS ══ -->
+<div class="desktop-icons">
+  <div class="d-icon" onclick="openWin('home')">
+    <svg viewBox="0 0 54 46" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 10 Q0 6 4 6L22 6 Q24 6 25 8L27 12 L50 12 Q54 12 54 16L54 42 Q54 46 50 46L4 46 Q0 46 0 42Z" fill="url(#fg1)"/>
+      <path d="M0 6 Q0 2 4 2L20 2 Q22 2 23 4L25 8 L4 8 Q0 8 0 12Z" fill="url(#ft1)"/>
+      <defs>
+        <linearGradient id="fg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6ec6f7"/><stop offset="100%" stop-color="#3ea0f0"/></linearGradient>
+        <linearGradient id="ft1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7fd0ff"/><stop offset="100%" stop-color="#5ab8f8"/></linearGradient>
+      </defs>
+    </svg>
+    <div class="d-icon-label">DJ Melo</div>
+  </div>
+  <div class="d-icon" onclick="openWin('gallery')">
+    <svg viewBox="0 0 54 46" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 10 Q0 6 4 6L22 6 Q24 6 25 8L27 12 L50 12 Q54 12 54 16L54 42 Q54 46 50 46L4 46 Q0 46 0 42Z" fill="url(#fg2)"/>
+      <path d="M0 6 Q0 2 4 2L20 2 Q22 2 23 4L25 8 L4 8 Q0 8 0 12Z" fill="url(#ft2)"/>
+      <defs>
+        <linearGradient id="fg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6ec6f7"/><stop offset="100%" stop-color="#3ea0f0"/></linearGradient>
+        <linearGradient id="ft2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7fd0ff"/><stop offset="100%" stop-color="#5ab8f8"/></linearGradient>
+      </defs>
+    </svg>
+    <div class="d-icon-label">Gallery 2026</div>
+  </div>
+  <div class="d-icon" onclick="openWin('mixes')">
+    <svg viewBox="0 0 54 46" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 10 Q0 6 4 6L22 6 Q24 6 25 8L27 12 L50 12 Q54 12 54 16L54 42 Q54 46 50 46L4 46 Q0 46 0 42Z" fill="url(#fg3)"/>
+      <path d="M0 6 Q0 2 4 2L20 2 Q22 2 23 4L25 8 L4 8 Q0 8 0 12Z" fill="url(#ft3)"/>
+      <defs>
+        <linearGradient id="fg3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6ec6f7"/><stop offset="100%" stop-color="#3ea0f0"/></linearGradient>
+        <linearGradient id="ft3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7fd0ff"/><stop offset="100%" stop-color="#5ab8f8"/></linearGradient>
+      </defs>
+    </svg>
+    <div class="d-icon-label">Mixes</div>
+  </div>
+</div>
+
+<!-- ══ DESKTOP ══ -->
+<div class="desktop" id="desktop" style="position:fixed;inset:24px 0 0 0;z-index:1;">
+
+<!-- helper macro for sidebar -->
+
+<!-- ══════ HOME WINDOW ══════ -->
+<div class="finder-window" id="win-home" style="width:490px;top:42px;left:225px;z-index:100;">
+  <div class="finder-titlebar" data-win="home">
+    <div class="traffic-lights">
+      <div class="tl tl-red" onclick="closeWin('home')"><svg viewBox="0 0 8 8"><use href="#tl-x"/></svg></div>
+      <div class="tl tl-yellow"><svg viewBox="0 0 8 8"><use href="#tl-min"/></svg></div>
+      <div class="tl tl-green"><svg viewBox="0 0 8 8"><use href="#tl-max"/></svg></div>
+    </div>
+    <div class="finder-title">DJ MELO — Home</div>
+    <div class="finder-path">~/djmelo</div>
+  </div>
+  <div class="finder-toolbar">
+    <div class="tb-btn"><svg viewBox="0 0 24 24"><use href="#ico-back"/></svg></div>
+    <div class="tb-btn"><svg viewBox="0 0 24 24"><use href="#ico-fwd"/></svg></div>
+    <div class="tb-sep"></div>
+    <div class="tb-btn"><svg viewBox="0 0 24 24"><use href="#ico-grid"/></svg></div>
+    <div class="tb-btn"><svg viewBox="0 0 24 24"><use href="#ico-list"/></svg></div>
+    <div class="tb-search"><svg viewBox="0 0 24 24"><use href="#ico-search"/></svg> Search</div>
+  </div>
+  <div style="display:flex;flex:1;overflow:hidden;">
+    <div class="finder-sidebar">
+      <div class="sb-section">
+        <div class="sb-heading">Favourites</div>
+        <div class="sb-item active" onclick="openWin('home')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2" stroke-linecap="round"><use href="#ico-home"/></svg></span>Home</div>
+        <div class="sb-item" onclick="openWin('mixes')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#ff6b35" stroke-width="2"><use href="#ico-music"/></svg></span>Mixes<span class="sb-count">5</span></div>
+        <div class="sb-item" onclick="openWin('events')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#ff3b30" stroke-width="2"><use href="#ico-calendar"/></svg></span>Events<span class="sb-count">4</span></div>
+        <div class="sb-item" onclick="openWin('gallery')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#af52de" stroke-width="2"><use href="#ico-photo"/></svg></span>Gallery<span class="sb-count">9</span></div>
+      </div>
+      <div class="sb-section">
+        <div class="sb-heading">Links</div>
+        <div class="sb-item" onclick="openWin('socials')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2"><use href="#ico-link"/></svg></span>Socials</div>
+        <div class="sb-item" onclick="openWin('about')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#5856d6" stroke-width="2"><use href="#ico-person"/></svg></span>About</div>
+        <div class="sb-item" onclick="openWin('booking')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#00c87a" stroke-width="2"><use href="#ico-mail"/></svg></span>Book Me</div>
+      </div>
+    </div>
+    <div class="home-inner">
+      <div class="home-content">
+        <div class="home-vinyl"></div>
+        <div class="home-name">MELO</div>
+        <div class="home-sub">London · Electronic · Afrobeats · House</div>
+        <div class="home-eq" id="homeEq"></div>
+        <div class="home-tags">
+          <span class="htag">Fabric Resident</span>
+          <span class="htag">8+ Years</span>
+          <span class="htag">200+ Shows</span>
+          <span class="htag">London 🇬🇧</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="finder-statusbar">7 items · Updated today</div>
+</div>
+
+<!-- ══════ MIXES WINDOW ══════ -->
+<div class="finder-window" id="win-mixes" style="width:630px;top:72px;left:265px;z-index:100;">
+  <div class="finder-titlebar" data-win="mixes">
+    <div class="traffic-lights">
+      <div class="tl tl-red" onclick="closeWin('mixes')"><svg viewBox="0 0 8 8"><use href="#tl-x"/></svg></div>
+      <div class="tl tl-yellow"><svg viewBox="0 0 8 8"><use href="#tl-min"/></svg></div>
+      <div class="tl tl-green"><svg viewBox="0 0 8 8"><use href="#tl-max"/></svg></div>
+    </div>
+    <div class="finder-title">Mixes</div>
+    <div class="finder-path">~/djmelo/mixes</div>
+  </div>
+  <div class="finder-toolbar">
+    <div class="tb-btn"><svg viewBox="0 0 24 24"><use href="#ico-back"/></svg></div>
+    <div class="tb-btn"><svg viewBox="0 0 24 24"><use href="#ico-fwd"/></svg></div>
+    <div class="tb-sep"></div>
+    <div class="tb-btn"><svg viewBox="0 0 24 24"><use href="#ico-list"/></svg></div>
+    <div class="tb-btn"><svg viewBox="0 0 24 24"><use href="#ico-grid"/></svg></div>
+    <div class="tb-search"><svg viewBox="0 0 24 24"><use href="#ico-search"/></svg> Search</div>
+  </div>
+  <div style="display:flex;flex:1;overflow:hidden;">
+    <div class="finder-sidebar">
+      <div class="sb-section">
+        <div class="sb-heading">Favourites</div>
+        <div class="sb-item" onclick="openWin('home')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2"><use href="#ico-home"/></svg></span>Home</div>
+        <div class="sb-item active"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#ff6b35" stroke-width="2"><use href="#ico-music"/></svg></span>Mixes<span class="sb-count">5</span></div>
+        <div class="sb-item" onclick="openWin('events')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#ff3b30" stroke-width="2"><use href="#ico-calendar"/></svg></span>Events</div>
+        <div class="sb-item" onclick="openWin('gallery')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#af52de" stroke-width="2"><use href="#ico-photo"/></svg></span>Gallery</div>
+        <div class="sb-item" onclick="openWin('socials')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2"><use href="#ico-link"/></svg></span>Socials</div>
+        <div class="sb-item" onclick="openWin('about')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#5856d6" stroke-width="2"><use href="#ico-person"/></svg></span>About</div>
+        <div class="sb-item" onclick="openWin('booking')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#00c87a" stroke-width="2"><use href="#ico-mail"/></svg></span>Book Me</div>
+      </div>
+    </div>
+    <div class="finder-content">
+      <div class="list-view">
+        <div class="list-header"><span>Name</span><span>Duration</span><span>Genre</span></div>
+        <div class="list-row playing">
+          <div class="l-name"><div class="l-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#00aa55" stroke-width="2"><use href="#ico-music"/></svg></div>Late Night Frequencies Vol. 4</div>
+          <span class="l-dur">1:24:32</span><span class="l-tag">House</span>
+        </div>
+        <div class="list-row">
+          <div class="l-name"><div class="l-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#ff6b35" stroke-width="2"><use href="#ico-music"/></svg></div>Afro Sessions — Spring 2026</div>
+          <span class="l-dur">58:14</span><span class="l-tag">Afrobeats</span>
+        </div>
+        <div class="list-row">
+          <div class="l-name"><div class="l-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#ff6b35" stroke-width="2"><use href="#ico-music"/></svg></div>Fabric Residency — March 2026</div>
+          <span class="l-dur">2:02:44</span><span class="l-tag">Techno</span>
+        </div>
+        <div class="list-row">
+          <div class="l-name"><div class="l-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#ff6b35" stroke-width="2"><use href="#ico-music"/></svg></div>Sunset Sessions — Ibiza</div>
+          <span class="l-dur">1:12:08</span><span class="l-tag">Melodic</span>
+        </div>
+        <div class="list-row">
+          <div class="l-name"><div class="l-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#ff6b35" stroke-width="2"><use href="#ico-music"/></svg></div>Bass Underground — Winter Mix</div>
+          <span class="l-dur">47:30</span><span class="l-tag">UK Bass</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="finder-statusbar">5 items · 6.3 GB available</div>
+</div>
+
+<!-- ══════ GALLERY WINDOW ══════ -->
+<div class="finder-window" id="win-gallery" style="width:680px;top:52px;left:185px;z-index:100;">
+  <div class="finder-titlebar" data-win="gallery">
+    <div class="traffic-lights">
+      <div class="tl tl-red" onclick="closeWin('gallery')"><svg viewBox="0 0 8 8"><use href="#tl-x"/></svg></div>
+      <div class="tl tl-yellow"><svg viewBox="0 0 8 8"><use href="#tl-min"/></svg></div>
+      <div class="tl tl-green"><svg viewBox="0 0 8 8"><use href="#tl-max"/></svg></div>
+    </div>
+    <div class="finder-title">Gallery 2026</div>
+    <div class="finder-path">~/djmelo/gallery</div>
+  </div>
+  <div class="finder-toolbar">
+    <div class="tb-btn"><svg viewBox="0 0 24 24"><use href="#ico-back"/></svg></div>
+    <div class="tb-btn"><svg viewBox="0 0 24 24"><use href="#ico-fwd"/></svg></div>
+    <div class="tb-sep"></div>
+    <div class="tb-btn"><svg viewBox="0 0 24 24"><use href="#ico-grid"/></svg></div>
+    <div class="tb-btn"><svg viewBox="0 0 24 24"><use href="#ico-list"/></svg></div>
+    <div class="tb-search"><svg viewBox="0 0 24 24"><use href="#ico-search"/></svg> Search</div>
+  </div>
+  <div style="display:flex;flex:1;overflow:hidden;">
+    <div class="finder-sidebar">
+      <div class="sb-section">
+        <div class="sb-heading">Favourites</div>
+        <div class="sb-item" onclick="openWin('home')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2"><use href="#ico-home"/></svg></span>Home</div>
+        <div class="sb-item" onclick="openWin('mixes')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#ff6b35" stroke-width="2"><use href="#ico-music"/></svg></span>Mixes</div>
+        <div class="sb-item" onclick="openWin('events')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#ff3b30" stroke-width="2"><use href="#ico-calendar"/></svg></span>Events</div>
+        <div class="sb-item active"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#af52de" stroke-width="2"><use href="#ico-photo"/></svg></span>Gallery<span class="sb-count">9</span></div>
+        <div class="sb-item" onclick="openWin('socials')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2"><use href="#ico-link"/></svg></span>Socials</div>
+        <div class="sb-item" onclick="openWin('about')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#5856d6" stroke-width="2"><use href="#ico-person"/></svg></span>About</div>
+        <div class="sb-item" onclick="openWin('booking')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#00c87a" stroke-width="2"><use href="#ico-mail"/></svg></span>Book Me</div>
+      </div>
+      <div class="sb-section" style="margin-top:6px;">
+        <div class="sb-heading">Albums</div>
+        <div class="sb-item"><span class="sb-icon"><svg viewBox="0 0 54 46"><use href="#ico-folder"/></svg></span>Fabric 2026</div>
+        <div class="sb-item"><span class="sb-icon"><svg viewBox="0 0 54 46"><use href="#ico-folder"/></svg></span>Ibiza</div>
+        <div class="sb-item"><span class="sb-icon"><svg viewBox="0 0 54 46"><use href="#ico-folder"/></svg></span>Studio</div>
+        <div class="sb-item"><span class="sb-icon"><svg viewBox="0 0 54 46"><use href="#ico-folder"/></svg></span>Press</div>
+      </div>
+    </div>
+    <div class="finder-content">
+      <div style="display:flex;gap:10px;">
+        <div style="flex:1;display:flex;flex-direction:column;gap:10px;">
+          <div class="photo-col">
+            <div class="photo-thumb" style="background:linear-gradient(135deg,#1a0533,#4CAF82);height:130px;" onclick="openPreview('🎧','Melo_Fabric_01.jpg')"><span class="pt-emoji">🎧</span></div>
+            <div class="photo-label">Melo_Fabric_01.jpg</div>
+          </div>
+          <div class="photo-col">
+            <div class="photo-thumb" style="background:linear-gradient(135deg,#0f3443,#34e89e);height:100px;" onclick="openPreview('🔮','Melo_Studio_03.jpg')"><span class="pt-emoji">🔮</span></div>
+            <div class="photo-label">Melo_Studio_03.jpg</div>
+          </div>
+          <div class="photo-col">
+            <div class="photo-thumb" style="background:linear-gradient(135deg,#0d1b2a,#f7b733);height:110px;" onclick="openPreview('⚡','Melo_Press_07.jpg')"><span class="pt-emoji">⚡</span></div>
+            <div class="photo-label">Melo_Press_07.jpg</div>
+          </div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:10px;margin-top:24px;">
+          <div class="photo-col">
+            <div class="photo-thumb" style="background:linear-gradient(135deg,#2d1b69,#e91e63);height:115px;" onclick="openPreview('🌃','Melo_Ibiza_02.jpg')"><span class="pt-emoji">🌃</span></div>
+            <div class="photo-label">Melo_Ibiza_02.jpg</div>
+          </div>
+          <div class="photo-col">
+            <div class="photo-thumb" style="background:linear-gradient(135deg,#1a1a2e,#00c4ff);height:95px;" onclick="openPreview('🌊','Melo_Stage_05.jpg')"><span class="pt-emoji">🌊</span></div>
+            <div class="photo-label">Melo_Stage_05.jpg</div>
+          </div>
+          <div class="photo-col">
+            <div class="photo-thumb" style="background:linear-gradient(135deg,#1a0a0a,#c0392b);height:120px;" onclick="openPreview('🔥','Melo_Live_09.jpg')"><span class="pt-emoji">🔥</span></div>
+            <div class="photo-label">Melo_Live_09.jpg</div>
+          </div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:10px;margin-top:12px;">
+          <div class="photo-col">
+            <div class="photo-thumb" style="background:linear-gradient(135deg,#0a1628,#6dd4a0);height:105px;" onclick="openPreview('🎼','Melo_Setup_04.jpg')"><span class="pt-emoji">🎼</span></div>
+            <div class="photo-label">Melo_Setup_04.jpg</div>
+          </div>
+          <div class="photo-col">
+            <div class="photo-thumb" style="background:linear-gradient(135deg,#2c3e50,#8e44ad);height:125px;" onclick="openPreview('✨','Melo_Crowd_06.jpg')"><span class="pt-emoji">✨</span></div>
+            <div class="photo-label">Melo_Crowd_06.jpg</div>
+          </div>
+          <div class="photo-col">
+            <div class="photo-thumb" style="background:linear-gradient(135deg,#0d0d0d,#00e87a);height:90px;" onclick="openPreview('🎛','Melo_Booth_08.jpg')"><span class="pt-emoji">🎛</span></div>
+            <div class="photo-label">Melo_Booth_08.jpg</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="finder-statusbar">9 items · 247 MB</div>
+</div>
+
+<!-- ══════ EVENTS WINDOW ══════ -->
+<div class="finder-window" id="win-events" style="width:590px;top:62px;left:245px;z-index:100;">
+  <div class="finder-titlebar" data-win="events">
+    <div class="traffic-lights">
+      <div class="tl tl-red" onclick="closeWin('events')"><svg viewBox="0 0 8 8"><use href="#tl-x"/></svg></div>
+      <div class="tl tl-yellow"><svg viewBox="0 0 8 8"><use href="#tl-min"/></svg></div>
+      <div class="tl tl-green"><svg viewBox="0 0 8 8"><use href="#tl-max"/></svg></div>
+    </div>
+    <div class="finder-title">Upcoming Events</div>
+    <div class="finder-path">~/djmelo/events</div>
+  </div>
+  <div class="finder-toolbar">
+    <div class="tb-btn"><svg viewBox="0 0 24 24"><use href="#ico-back"/></svg></div>
+    <div class="tb-btn"><svg viewBox="0 0 24 24"><use href="#ico-fwd"/></svg></div>
+    <div class="tb-sep"></div>
+    <div class="tb-btn"><svg viewBox="0 0 24 24"><use href="#ico-list"/></svg></div>
+    <div class="tb-search"><svg viewBox="0 0 24 24"><use href="#ico-search"/></svg> Search</div>
+  </div>
+  <div style="display:flex;flex:1;overflow:hidden;">
+    <div class="finder-sidebar">
+      <div class="sb-section">
+        <div class="sb-heading">Favourites</div>
+        <div class="sb-item" onclick="openWin('home')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2"><use href="#ico-home"/></svg></span>Home</div>
+        <div class="sb-item" onclick="openWin('mixes')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#ff6b35" stroke-width="2"><use href="#ico-music"/></svg></span>Mixes</div>
+        <div class="sb-item active"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#ff3b30" stroke-width="2"><use href="#ico-calendar"/></svg></span>Events<span class="sb-count">4</span></div>
+        <div class="sb-item" onclick="openWin('gallery')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#af52de" stroke-width="2"><use href="#ico-photo"/></svg></span>Gallery</div>
+        <div class="sb-item" onclick="openWin('socials')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2"><use href="#ico-link"/></svg></span>Socials</div>
+        <div class="sb-item" onclick="openWin('about')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#5856d6" stroke-width="2"><use href="#ico-person"/></svg></span>About</div>
+        <div class="sb-item" onclick="openWin('booking')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#00c87a" stroke-width="2"><use href="#ico-mail"/></svg></span>Book Me</div>
+      </div>
+    </div>
+    <div class="finder-content">
+      <div class="events-list">
+        <div class="event-row">
+          <div class="ev-date"><div class="ev-day">02</div><div class="ev-month">May</div></div>
+          <div class="ev-info">
+            <div class="ev-name">FABRIC London — Late Night</div>
+            <div class="ev-venue"><svg viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"><use href="#ico-pin"/></svg>Fabric, EC1A · 23:00–06:00</div>
+          </div>
+          <span class="ev-tag">House</span>
+          <button class="ev-ticket">Tickets</button>
+        </div>
+        <div class="event-row">
+          <div class="ev-date"><div class="ev-day">18</div><div class="ev-month">May</div></div>
+          <div class="ev-info">
+            <div class="ev-name">Amsterdam Dance Festival</div>
+            <div class="ev-venue"><svg viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"><use href="#ico-pin"/></svg>Shelter, Amsterdam</div>
+          </div>
+          <span class="ev-tag">Live</span>
+          <button class="ev-ticket">Tickets</button>
+        </div>
+        <div class="event-row">
+          <div class="ev-date"><div class="ev-day">07</div><div class="ev-month">Jun</div></div>
+          <div class="ev-info">
+            <div class="ev-name">Notting Hill After Party</div>
+            <div class="ev-venue"><svg viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"><use href="#ico-pin"/></svg>XOYO, London</div>
+          </div>
+          <span class="ev-tag">Afrobeats</span>
+          <button class="ev-ticket">Tickets</button>
+        </div>
+        <div class="event-row">
+          <div class="ev-date" style="background:#34c759;"><div class="ev-day">21</div><div class="ev-month">Jun</div></div>
+          <div class="ev-info">
+            <div class="ev-name">Summer Solstice — Open Air</div>
+            <div class="ev-venue"><svg viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"><use href="#ico-pin"/></svg>Victoria Park, London</div>
+          </div>
+          <span class="ev-tag">Outdoor</span>
+          <button class="ev-ticket" style="background:#34c759;">Free</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="finder-statusbar">4 upcoming events</div>
+</div>
+
+<!-- ══════ SOCIALS WINDOW ══════ -->
+<div class="finder-window" id="win-socials" style="width:510px;top:82px;left:285px;z-index:100;">
+  <div class="finder-titlebar" data-win="socials">
+    <div class="traffic-lights">
+      <div class="tl tl-red" onclick="closeWin('socials')"><svg viewBox="0 0 8 8"><use href="#tl-x"/></svg></div>
+      <div class="tl tl-yellow"><svg viewBox="0 0 8 8"><use href="#tl-min"/></svg></div>
+      <div class="tl tl-green"><svg viewBox="0 0 8 8"><use href="#tl-max"/></svg></div>
+    </div>
+    <div class="finder-title">Social Links</div>
+    <div class="finder-path">~/djmelo/socials</div>
+  </div>
+  <div style="display:flex;flex:1;overflow:hidden;">
+    <div class="finder-sidebar">
+      <div class="sb-section">
+        <div class="sb-heading">Favourites</div>
+        <div class="sb-item" onclick="openWin('home')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2"><use href="#ico-home"/></svg></span>Home</div>
+        <div class="sb-item" onclick="openWin('mixes')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#ff6b35" stroke-width="2"><use href="#ico-music"/></svg></span>Mixes</div>
+        <div class="sb-item" onclick="openWin('events')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#ff3b30" stroke-width="2"><use href="#ico-calendar"/></svg></span>Events</div>
+        <div class="sb-item" onclick="openWin('gallery')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#af52de" stroke-width="2"><use href="#ico-photo"/></svg></span>Gallery</div>
+        <div class="sb-item active"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2"><use href="#ico-link"/></svg></span>Socials</div>
+        <div class="sb-item" onclick="openWin('about')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#5856d6" stroke-width="2"><use href="#ico-person"/></svg></span>About</div>
+        <div class="sb-item" onclick="openWin('booking')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#00c87a" stroke-width="2"><use href="#ico-mail"/></svg></span>Book Me</div>
+      </div>
+    </div>
+    <div class="finder-content">
+      <div class="socials-list">
+        <div class="social-row">
+          <div class="s-iconbox" style="background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#bc1888);"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><use href="#ico-ig"/></svg></div>
+          <div><div class="s-name">Instagram</div><div class="s-handle">@djmelo.official</div></div>
+          <div class="s-arrow">›</div>
+        </div>
+        <div class="social-row">
+          <div class="s-iconbox" style="background:#ff0000;"><svg viewBox="0 0 24 24"><use href="#ico-yt"/></svg></div>
+          <div><div class="s-name">YouTube</div><div class="s-handle">DJ Melo Official</div></div>
+          <div class="s-arrow">›</div>
+        </div>
+        <div class="social-row">
+          <div class="s-iconbox" style="background:#ff5500;"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><use href="#ico-sc"/></svg></div>
+          <div><div class="s-name">SoundCloud</div><div class="s-handle">djmelo</div></div>
+          <div class="s-arrow">›</div>
+        </div>
+        <div class="social-row">
+          <div class="s-iconbox" style="background:#1DB954;"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><use href="#ico-spotify"/></svg></div>
+          <div><div class="s-name">Spotify</div><div class="s-handle">DJ Melo</div></div>
+          <div class="s-arrow">›</div>
+        </div>
+        <div class="social-row">
+          <div class="s-iconbox" style="background:#000;"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><use href="#ico-x"/></svg></div>
+          <div><div class="s-name">X / Twitter</div><div class="s-handle">@djmelo</div></div>
+          <div class="s-arrow">›</div>
+        </div>
+        <div class="social-row">
+          <div class="s-iconbox" style="background:#52aad8;"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><use href="#ico-mix"/></svg></div>
+          <div><div class="s-name">Mixcloud</div><div class="s-handle">/djmelo</div></div>
+          <div class="s-arrow">›</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="finder-statusbar">6 links</div>
+</div>
+
+<!-- ══════ ABOUT WINDOW ══════ -->
+<div class="finder-window" id="win-about" style="width:570px;top:67px;left:255px;z-index:100;">
+  <div class="finder-titlebar" data-win="about">
+    <div class="traffic-lights">
+      <div class="tl tl-red" onclick="closeWin('about')"><svg viewBox="0 0 8 8"><use href="#tl-x"/></svg></div>
+      <div class="tl tl-yellow"><svg viewBox="0 0 8 8"><use href="#tl-min"/></svg></div>
+      <div class="tl tl-green"><svg viewBox="0 0 8 8"><use href="#tl-max"/></svg></div>
+    </div>
+    <div class="finder-title">About Melo</div>
+    <div class="finder-path">~/djmelo/about.txt</div>
+  </div>
+  <div style="display:flex;flex:1;overflow:hidden;">
+    <div class="finder-sidebar">
+      <div class="sb-section">
+        <div class="sb-heading">Favourites</div>
+        <div class="sb-item" onclick="openWin('home')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2"><use href="#ico-home"/></svg></span>Home</div>
+        <div class="sb-item" onclick="openWin('mixes')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#ff6b35" stroke-width="2"><use href="#ico-music"/></svg></span>Mixes</div>
+        <div class="sb-item" onclick="openWin('events')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#ff3b30" stroke-width="2"><use href="#ico-calendar"/></svg></span>Events</div>
+        <div class="sb-item" onclick="openWin('gallery')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#af52de" stroke-width="2"><use href="#ico-photo"/></svg></span>Gallery</div>
+        <div class="sb-item" onclick="openWin('socials')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2"><use href="#ico-link"/></svg></span>Socials</div>
+        <div class="sb-item active"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#5856d6" stroke-width="2"><use href="#ico-person"/></svg></span>About</div>
+        <div class="sb-item" onclick="openWin('booking')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#00c87a" stroke-width="2"><use href="#ico-mail"/></svg></span>Book Me</div>
+      </div>
+    </div>
+    <div class="finder-content">
+      <div class="about-header">
+        <div class="about-avi"><svg viewBox="0 0 24 24" fill="#fff"><use href="#ico-headphones"/></svg></div>
+        <div class="about-avi-info">
+          <h2>DJ MELO</h2>
+          <p>London-based DJ & selector. Fabric resident. Rooted in afrobeats, deep house, and UK bass. Born in Peckham, playing for the world.</p>
+        </div>
+      </div>
+      <div class="about-stats">
+        <div class="astat"><div class="astat-n">8+</div><div class="astat-l">Years</div></div>
+        <div class="astat"><div class="astat-n">200+</div><div class="astat-l">Shows</div></div>
+        <div class="astat"><div class="astat-n">50K</div><div class="astat-l">Fans</div></div>
+        <div class="astat"><div class="astat-n">12</div><div class="astat-l">Releases</div></div>
+      </div>
+      <div class="about-divider"></div>
+      <p class="about-bio-text">Melo has been shaping London's underground music scene since 2018. With roots in Peckham and a sound that draws from afrobeats, deep house, and UK bass, he's become one of the city's most sought-after selectors. His residency at Fabric and international bookings speak to a global appeal built on raw talent and an unwavering connection to the dancefloor.</p>
+      <div class="skill-list">
+        <div><div class="sk-top"><span>House</span><span class="sk-pct">98%</span></div><div class="sk-bar"><div class="sk-fill" style="width:98%"></div></div></div>
+        <div><div class="sk-top"><span>Afrobeats</span><span class="sk-pct">95%</span></div><div class="sk-bar"><div class="sk-fill" style="width:95%"></div></div></div>
+        <div><div class="sk-top"><span>Techno</span><span class="sk-pct">87%</span></div><div class="sk-bar"><div class="sk-fill" style="width:87%"></div></div></div>
+        <div><div class="sk-top"><span>UK Bass</span><span class="sk-pct">92%</span></div><div class="sk-bar"><div class="sk-fill" style="width:92%"></div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="finder-statusbar">about.txt · 1 item</div>
+</div>
+
+<!-- ══════ BOOKING WINDOW ══════ -->
+<div class="finder-window" id="win-booking" style="width:550px;top:77px;left:275px;z-index:100;">
+  <div class="finder-titlebar" data-win="booking">
+    <div class="traffic-lights">
+      <div class="tl tl-red" onclick="closeWin('booking')"><svg viewBox="0 0 8 8"><use href="#tl-x"/></svg></div>
+      <div class="tl tl-yellow"><svg viewBox="0 0 8 8"><use href="#tl-min"/></svg></div>
+      <div class="tl tl-green"><svg viewBox="0 0 8 8"><use href="#tl-max"/></svg></div>
+    </div>
+    <div class="finder-title">Book DJ Melo</div>
+    <div class="finder-path">~/djmelo/booking</div>
+  </div>
+  <div style="display:flex;flex:1;overflow:hidden;">
+    <div class="finder-sidebar">
+      <div class="sb-section">
+        <div class="sb-heading">Favourites</div>
+        <div class="sb-item" onclick="openWin('home')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2"><use href="#ico-home"/></svg></span>Home</div>
+        <div class="sb-item" onclick="openWin('mixes')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#ff6b35" stroke-width="2"><use href="#ico-music"/></svg></span>Mixes</div>
+        <div class="sb-item" onclick="openWin('events')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#ff3b30" stroke-width="2"><use href="#ico-calendar"/></svg></span>Events</div>
+        <div class="sb-item" onclick="openWin('gallery')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#af52de" stroke-width="2"><use href="#ico-photo"/></svg></span>Gallery</div>
+        <div class="sb-item" onclick="openWin('socials')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2"><use href="#ico-link"/></svg></span>Socials</div>
+        <div class="sb-item" onclick="openWin('about')"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#5856d6" stroke-width="2"><use href="#ico-person"/></svg></span>About</div>
+        <div class="sb-item active"><span class="sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#00c87a" stroke-width="2"><use href="#ico-mail"/></svg></span>Book Me</div>
+      </div>
+    </div>
+    <div class="finder-content">
+      <div class="booking-body">
+        <div class="booking-top">
+          <div class="binfo-card">
+            <div class="bi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2" width="24" height="24"><use href="#ico-mail"/></svg></div>
+            <div class="bi-label">Email</div><div class="bi-val">book@djmelo.com</div>
+          </div>
+          <div class="binfo-card">
+            <div class="bi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#34c759" stroke-width="2" width="24" height="24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 20 20 0 0 1-8.7-3.1 19.7 19.7 0 0 1-6-6 20 20 0 0 1-3.1-8.7A2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7 13 13 0 0 0 .7 2.8 2 2 0 0 1-.4 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4 13 13 0 0 0 2.8.7A2 2 0 0 1 22 17z" fill="none" stroke="#34c759" stroke-width="2"/></svg></div>
+            <div class="bi-label">Manager</div><div class="bi-val">+44 7700 900 000</div>
+          </div>
+        </div>
+        <div class="bform">
+          <div class="brow">
+            <div class="bgroup"><label>Your Name</label><input type="text" placeholder="John Smith"></div>
+            <div class="bgroup"><label>Email</label><input type="email" placeholder="you@example.com"></div>
+          </div>
+          <div class="brow">
+            <div class="bgroup"><label>Event Date</label><input type="date"></div>
+            <div class="bgroup"><label>Event Type</label><select><option>Club Night</option><option>Private Party</option><option>Festival</option><option>Corporate</option></select></div>
+          </div>
+          <div class="bgroup"><label>Message</label><textarea placeholder="Tell Melo about your event..."></textarea></div>
+          <button class="bsubmit">Send Booking Request</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="finder-statusbar">booking@djmelo.com</div>
+</div>
+
+<!-- Preview window -->
+<div class="preview-window" id="previewWin" style="top:120px;left:640px;">
+  <div class="preview-titlebar" data-win="preview">
+    <div class="traffic-lights">
+      <div class="tl tl-red" onclick="closePreview()"><svg viewBox="0 0 8 8"><use href="#tl-x"/></svg></div>
+      <div class="tl tl-yellow"><svg viewBox="0 0 8 8"><use href="#tl-min"/></svg></div>
+      <div class="tl tl-green"><svg viewBox="0 0 8 8"><use href="#tl-max"/></svg></div>
+    </div>
+    <div class="preview-title" id="previewTitle">photo.jpg</div>
+  </div>
+  <div class="preview-content" id="previewContent">🎧</div>
+</div>
+
+</div><!-- /desktop -->
+
+<!-- ══ DOCK ══ -->
+<div class="dock-wrap">
+  <div class="dock">
+
+    <!-- Home — Finder-style blue folder icon -->
+    <div class="d-item" onclick="openWin('home')">
+      <div class="d-item-icon" style="background:#fff; padding:0; overflow:visible; position:relative;">
+        <!-- macOS Finder icon: folder + face -->
+        <svg viewBox="0 0 60 60" width="54" height="54" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;">
+          <rect width="60" height="60" rx="13.5" fill="#2196F3"/>
+          <!-- folder body -->
+          <path d="M10 36 Q10 32 14 32L46 32 Q50 32 50 36L50 48 Q50 52 46 52L14 52 Q10 52 10 48Z" fill="#90CAF9"/>
+          <path d="M10 26 Q10 22 14 22L24 22 Q26 22 27 24L29 28L46 28 Q50 28 50 32L50 36L10 36Z" fill="#BBDEFB"/>
+          <path d="M10 32 L50 32 L50 36 L10 36Z" fill="rgba(0,0,0,0.06)"/>
+          <!-- smiley face on folder -->
+          <circle cx="24" cy="42" r="2.5" fill="#1565C0" opacity="0.7"/>
+          <circle cx="36" cy="42" r="2.5" fill="#1565C0" opacity="0.7"/>
+          <path d="M24 46 Q30 50 36 46" fill="none" stroke="#1565C0" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+        </svg>
+      </div>
+      <div class="d-tooltip">Home</div>
+      <div class="d-dot on" id="dot-home"></div>
+    </div>
+
+    <!-- Mixes — Music app style (pink/red gradient, music note) -->
+    <div class="d-item" onclick="openWin('mixes')">
+      <div class="d-item-icon" style="background:linear-gradient(160deg,#fc5c7d,#6a3093);">
+        <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><use href="#ico-music"/></svg>
+      </div>
+      <div class="d-tooltip">Mixes</div>
+      <div class="d-dot" id="dot-mixes"></div>
+    </div>
+
+    <!-- Events — Calendar app style (white face, red header with date) -->
+    <div class="d-item" onclick="openWin('events')">
+      <div class="d-item-icon" style="background:#fff; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; border-radius:13.5px; overflow:hidden; padding:0;">
+        <div style="width:100%; background:linear-gradient(to bottom,#ff453a,#d63a31); height:20px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+          <span style="font-size:7.5px; font-weight:700; color:#fff; font-family:var(--sf); letter-spacing:0.08em; text-transform:uppercase;">May</span>
+        </div>
+        <div style="font-size:22px; font-weight:100; color:#1c1c1e; font-family:var(--sf); letter-spacing:-0.03em; margin-top:2px; line-height:1;">2</div>
+      </div>
+      <div class="d-tooltip">Events</div>
+      <div class="d-dot" id="dot-events"></div>
+    </div>
+
+    <!-- Gallery — Photos app style (rainbow pinwheel gradient) -->
+    <div class="d-item" onclick="openWin('gallery')">
+      <div class="d-item-icon" style="background:#fff; overflow:hidden; padding:0;">
+        <svg viewBox="0 0 60 60" width="54" height="54" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;">
+          <rect width="60" height="60" rx="13.5" fill="#fff"/>
+          <!-- Photos app pinwheel petals -->
+          <path d="M30 30 L30 10 A20 20 0 0 1 47.3 20Z" fill="#FF3B30"/>
+          <path d="M30 30 L47.3 20 A20 20 0 0 1 47.3 40Z" fill="#FF9500"/>
+          <path d="M30 30 L47.3 40 A20 20 0 0 1 30 50Z" fill="#FFCC00"/>
+          <path d="M30 30 L30 50 A20 20 0 0 1 12.7 40Z" fill="#34C759"/>
+          <path d="M30 30 L12.7 40 A20 20 0 0 1 12.7 20Z" fill="#007AFF"/>
+          <path d="M30 30 L12.7 20 A20 20 0 0 1 30 10Z" fill="#AF52DE"/>
+          <circle cx="30" cy="30" r="8" fill="#fff"/>
+          <circle cx="30" cy="30" r="5" fill="#f0f0f0"/>
+        </svg>
+      </div>
+      <div class="d-tooltip">Gallery</div>
+      <div class="d-dot" id="dot-gallery"></div>
+    </div>
+
+    <!-- Socials — Safari-style compass -->
+    <div class="d-item" onclick="openWin('socials')">
+      <div class="d-item-icon" style="background:linear-gradient(160deg,#5ac8fa,#007aff); overflow:hidden; padding:0;">
+        <svg viewBox="0 0 60 60" width="54" height="54" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;">
+          <rect width="60" height="60" rx="13.5" fill="url(#safariGrad)"/>
+          <defs>
+            <radialGradient id="safariGrad" cx="40%" cy="35%">
+              <stop offset="0%" stop-color="#5ac8fa"/>
+              <stop offset="100%" stop-color="#007aff"/>
+            </radialGradient>
+          </defs>
+          <!-- compass circle -->
+          <circle cx="30" cy="30" r="17" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+          <!-- compass needle -->
+          <polygon points="30,16 33,30 30,28 27,30" fill="#ff3b30"/>
+          <polygon points="30,44 27,30 30,32 33,30" fill="#fff"/>
+          <!-- tick marks -->
+          <line x1="30" y1="13" x2="30" y2="17" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="30" y1="43" x2="30" y2="47" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="13" y1="30" x2="17" y2="30" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="43" y1="30" x2="47" y2="30" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="d-tooltip">Socials</div>
+      <div class="d-dot" id="dot-socials"></div>
+    </div>
+
+    <div class="dock-sep"></div>
+
+    <!-- About — Contacts app style (grey, person silhouette) -->
+    <div class="d-item" onclick="openWin('about')">
+      <div class="d-item-icon" style="background:linear-gradient(160deg,#f2f2f7,#d1d1d6); overflow:hidden; padding:0;">
+        <svg viewBox="0 0 60 60" width="54" height="54" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;">
+          <rect width="60" height="60" rx="13.5" fill="#f2f2f7"/>
+          <!-- contact card lines -->
+          <rect x="18" y="14" width="24" height="3" rx="1.5" fill="#c7c7cc"/>
+          <rect x="18" y="20" width="16" height="2" rx="1" fill="#e5e5ea"/>
+          <!-- person silhouette -->
+          <circle cx="30" cy="36" r="8" fill="#aeaeb2"/>
+          <circle cx="30" cy="29" r="5.5" fill="#aeaeb2"/>
+          <!-- left colored strip -->
+          <rect x="0" y="0" width="8" height="60" rx="13.5" fill="#007aff" style="border-radius:13.5px 0 0 13.5px;"/>
+          <rect x="0" y="0" width="8" height="60" fill="#007aff"/>
+          <!-- strip lines -->
+          <line x1="4" y1="20" x2="4" y2="40" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <div class="d-tooltip">About</div>
+      <div class="d-dot" id="dot-about"></div>
+    </div>
+
+    <!-- Book Me — Messages app style (green speech bubble) -->
+    <div class="d-item" onclick="openWin('booking')">
+      <div class="d-item-icon" style="background:linear-gradient(160deg,#34c759,#248a3d); overflow:hidden; padding:0;">
+        <svg viewBox="0 0 60 60" width="54" height="54" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;">
+          <rect width="60" height="60" rx="13.5" fill="url(#msgGrad)"/>
+          <defs>
+            <linearGradient id="msgGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#34c759"/>
+              <stop offset="100%" stop-color="#248a3d"/>
+            </linearGradient>
+          </defs>
+          <!-- speech bubble -->
+          <path d="M14 18 Q14 14 18 14 L42 14 Q46 14 46 18 L46 36 Q46 40 42 40 L26 40 L18 48 L20 40 Q14 40 14 36 Z" fill="rgba(255,255,255,0.95)"/>
+          <!-- message dots -->
+          <circle cx="23" cy="27" r="2.5" fill="#34c759"/>
+          <circle cx="30" cy="27" r="2.5" fill="#34c759"/>
+          <circle cx="37" cy="27" r="2.5" fill="#34c759"/>
+        </svg>
+      </div>
+      <div class="d-tooltip">Book Me</div>
+      <div class="d-dot" id="dot-booking"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Clock
+function tick() {
+  const n = new Date();
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('clock').textContent =
+    `${days[n.getDay()]} ${n.getDate()} ${months[n.getMonth()]} ${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
+}
+tick(); setInterval(tick, 1000);
+
+// Equalizer
+const eq = document.getElementById('homeEq');
+[[5,20,0.6],[12,32,0.42],[3,26,0.78],[16,34,0.5],[8,28,0.63],[2,22,0.54],[14,32,0.7],[6,24,0.46]].forEach(([a,b,d]) => {
+  const bar = document.createElement('div');
+  bar.className = 'h-bar';
+  bar.style.setProperty('--a', a+'px');
+  bar.style.setProperty('--b', b+'px');
+  bar.style.setProperty('--d', d+'s');
+  bar.style.height = a+'px';
+  eq.appendChild(bar);
+});
+
+// Window z-index
+let zTop = 200;
+
+function openWin(id) {
+  const win = document.getElementById('win-'+id);
+  win.classList.add('open');
+  win.style.zIndex = ++zTop;
+  const dot = document.getElementById('dot-'+id);
+  if (dot) dot.classList.add('on');
+}
+
+function closeWin(id) {
+  document.getElementById('win-'+id).classList.remove('open');
+  const dot = document.getElementById('dot-'+id);
+  if (dot) dot.classList.remove('on');
+}
+
+// Start with Home open
+openWin('home');
+
+// Drag
+document.querySelectorAll('.finder-titlebar, .preview-titlebar').forEach(tb => {
+  let drag = false, ox = 0, oy = 0;
+  const win = tb.closest('.finder-window') || tb.closest('.preview-window');
+
+  tb.addEventListener('mousedown', e => {
+    if (e.target.closest('.tl')) return;
+    drag = true;
+    ox = e.clientX - win.offsetLeft;
+    oy = e.clientY - win.offsetTop;
+    win.style.zIndex = ++zTop;
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!drag) return;
+    win.style.left = Math.max(-win.offsetWidth+80, Math.min(window.innerWidth-80, e.clientX-ox)) + 'px';
+    win.style.top  = Math.max(24, Math.min(window.innerHeight-40, e.clientY-oy)) + 'px';
+  });
+
+  document.addEventListener('mouseup', () => { drag = false; });
+});
+
+// Click to raise
+document.querySelectorAll('.finder-window, .preview-window').forEach(win => {
+  win.addEventListener('mousedown', () => { win.style.zIndex = ++zTop; });
+});
+
+// Preview
+function openPreview(emoji, filename) {
+  document.getElementById('previewContent').textContent = emoji;
+  document.getElementById('previewTitle').textContent = filename;
+  const pw = document.getElementById('previewWin');
+  pw.classList.add('open');
+  pw.style.zIndex = ++zTop;
+}
+function closePreview() { document.getElementById('previewWin').classList.remove('open'); }
+</script>
+</body>
+</html>
