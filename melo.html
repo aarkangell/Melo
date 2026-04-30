@@ -1,1 +1,2044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>DJ Melo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #1a1a1a;
+  --desktop-bg: #111;
+  --window-bg: rgba(30,30,30,0.96);
+  --window-border: rgba(255,255,255,0.1);
+  --sidebar-bg: rgba(20,20,20,0.9);
+  --sidebar-width: 160px;
+  --titlebar-h: 36px;
+  --accent: #4fc3f7;
+  --accent2: #ff6b6b;
+  --folder-blue: #4a9eff;
+  --text-primary: #f0f0f0;
+  --text-secondary: #888;
+  --text-muted: #555;
+  --dot-red: #ff5f57;
+  --dot-yellow: #febc2e;
+  --dot-green: #28c840;
+  --radius: 12px;
+  --shadow: 0 32px 80px rgba(0,0,0,0.7), 0 8px 24px rgba(0,0,0,0.5);
+}
 
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--desktop-bg);
+  min-height: 100vh;
+  overflow: hidden;
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* DESKTOP */
+#desktop {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  background: 
+    radial-gradient(ellipse at 20% 80%, rgba(79,195,247,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(255,107,107,0.05) 0%, transparent 50%),
+    #111;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* DESKTOP WALLPAPER TEXT */
+.desktop-title {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  text-align: center;
+  pointer-events: none;
+  user-select: none;
+}
+
+.desktop-title h1 {
+  font-family: 'Space Mono', monospace;
+  font-size: clamp(48px, 15vw, 120px);
+  font-weight: 700;
+  color: rgba(255,255,255,0.04);
+  letter-spacing: -2px;
+  line-height: 1;
+}
+
+.desktop-title p {
+  font-size: 11px;
+  color: rgba(255,255,255,0.08);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+
+/* DOCK */
+#dock {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(40,40,40,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px;
+  padding: 8px 12px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  z-index: 9999;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+}
+
+.dock-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dock-item:active { transform: scale(0.92); }
+
+.dock-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  position: relative;
+  transition: transform 0.15s ease;
+}
+
+@media (hover: hover) {
+  .dock-item:hover .dock-icon { transform: translateY(-6px) scale(1.1); }
+}
+
+.dock-icon.home-icon { background: linear-gradient(135deg, #1a1a2e, #16213e); border: 1px solid rgba(79,195,247,0.3); }
+.dock-icon.events-icon { background: linear-gradient(135deg, #1a0a0a, #2d1515); border: 1px solid rgba(255,107,107,0.3); }
+.dock-icon.booking-icon { background: linear-gradient(135deg, #0a1a0a, #152d15); border: 1px solid rgba(100,220,100,0.3); }
+.dock-icon.gallery-icon { background: linear-gradient(135deg, #1a1a0a, #2d2d10); border: 1px solid rgba(255,220,80,0.3); }
+.dock-icon.admin-icon { background: linear-gradient(135deg, #1a0a1a, #2d152d); border: 1px solid rgba(200,100,255,0.3); }
+
+.dock-label {
+  font-size: 9px;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+  font-weight: 500;
+}
+
+.dock-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+}
+
+.dock-item.open .dock-dot { display: block; }
+
+/* MENUBAR */
+#menubar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 28px;
+  background: rgba(20,20,20,0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  z-index: 10000;
+  justify-content: space-between;
+}
+
+.menubar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.menubar-logo {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 1px;
+}
+
+.menubar-items {
+  display: flex;
+  gap: 16px;
+}
+
+.menubar-item {
+  font-size: 11px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.menubar-item:hover { color: var(--text-primary); }
+
+.menubar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.menubar-time {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+/* WINDOW */
+.window {
+  position: fixed;
+  background: var(--window-bg);
+  border: 1px solid var(--window-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 100;
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+.window.hidden {
+  opacity: 0;
+  transform: scale(0.92) translateY(10px);
+  pointer-events: none;
+}
+
+.window.active { z-index: 200; }
+
+/* Mobile: full-screen-ish windows */
+@media (max-width: 768px) {
+  .window {
+    top: 32px !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 80px !important;
+    width: 100% !important;
+    height: calc(100vh - 112px) !important;
+    border-radius: 12px 12px 0 0;
+    border-left: none;
+    border-right: none;
+  }
+}
+
+@media (min-width: 769px) {
+  .window {
+    top: 48px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(680px, 95vw);
+    max-height: calc(100vh - 100px);
+  }
+  .window.hidden {
+    transform: translateX(-50%) scale(0.92) translateY(10px);
+  }
+}
+
+/* TITLEBAR */
+.titlebar {
+  height: var(--titlebar-h);
+  background: rgba(40,40,40,0.8);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0;
+  cursor: default;
+  user-select: none;
+}
+
+.traffic-lights {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.tl {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: filter 0.15s;
+  flex-shrink: 0;
+}
+
+.tl:hover { filter: brightness(1.2); }
+.tl.red { background: var(--dot-red); }
+.tl.yellow { background: var(--dot-yellow); }
+.tl.green { background: var(--dot-green); }
+
+.titlebar-title {
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0.3px;
+}
+
+.titlebar-icons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  width: 52px;
+  justify-content: flex-end;
+}
+
+.titlebar-icon {
+  width: 18px;
+  height: 18px;
+  opacity: 0.4;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.titlebar-icon:hover { opacity: 0.8; }
+
+/* WINDOW BODY */
+.window-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: var(--sidebar-width);
+  background: var(--sidebar-bg);
+  border-right: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  flex-direction: column;
+  padding: 12px 0;
+  flex-shrink: 0;
+}
+
+.sidebar-section {
+  padding: 0 8px;
+  margin-bottom: 8px;
+}
+
+.sidebar-section-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  margin-bottom: 2px;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sidebar-item:hover, .sidebar-item.active {
+  background: rgba(255,255,255,0.07);
+  color: var(--text-primary);
+}
+
+.sidebar-item.active {
+  color: var(--accent);
+  background: rgba(79,195,247,0.1);
+}
+
+.sidebar-item-icon { font-size: 13px; width: 16px; text-align: center; }
+
+/* CONTENT AREA */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+.content::-webkit-scrollbar { width: 4px; }
+.content::-webkit-scrollbar-track { background: transparent; }
+.content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+/* PAGE CONTENT SECTIONS */
+.page-section { display: none; }
+.page-section.active { display: block; }
+
+/* ===== HOME PAGE ===== */
+.hero-block {
+  text-align: center;
+  padding: 8px 0 24px;
+}
+
+.hero-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4fc3f7, #ff6b6b);
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 700;
+  font-family: 'Space Mono', monospace;
+  color: #fff;
+  position: relative;
+}
+
+.hero-avatar::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(79,195,247,0.4);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(40,200,100,0.12);
+  border: 1px solid rgba(40,200,100,0.25);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 10px;
+  color: #4caf50;
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+.status-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #4caf50;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.hero-name {
+  font-family: 'Space Mono', monospace;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.hero-tag {
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.hero-bio {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  max-width: 340px;
+  margin: 0 auto 20px;
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 12px 8px;
+  text-align: center;
+}
+
+.stat-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  display: block;
+}
+
+.stat-label {
+  font-size: 9px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-top: 2px;
+}
+
+.genres-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.genre-tag {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.socials-row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.social-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  text-decoration: none;
+}
+
+.social-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: var(--text-primary);
+}
+
+/* ===== EVENTS ===== */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.events-list { display: flex; flex-direction: column; gap: 10px; }
+
+.event-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 14px;
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.event-card:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.12);
+}
+
+.event-date-box {
+  background: rgba(79,195,247,0.12);
+  border: 1px solid rgba(79,195,247,0.25);
+  border-radius: 8px;
+  padding: 6px 4px;
+  text-align: center;
+}
+
+.event-day {
+  font-family: 'Space Mono', monospace;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent);
+  display: block;
+  line-height: 1;
+}
+
+.event-month {
+  font-size: 8px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.event-info { min-width: 0; }
+
+.event-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-venue {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.event-time {
+  font-size: 10px;
+  color: var(--text-secondary);
+  font-family: 'Space Mono', monospace;
+  white-space: nowrap;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+}
+
+.empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; }
+.empty-state p { font-size: 12px; line-height: 1.6; }
+
+/* ===== BOOKING ===== */
+.booking-form { display: flex; flex-direction: column; gap: 12px; }
+
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+
+.form-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.form-input, .form-textarea, .form-select {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--text-primary);
+  font-family: 'DM Sans', sans-serif;
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+
+.form-input::placeholder, .form-textarea::placeholder { color: var(--text-muted); }
+
+.form-input:focus, .form-textarea:focus, .form-select:focus {
+  border-color: rgba(79,195,247,0.5);
+  background: rgba(79,195,247,0.05);
+}
+
+.form-textarea { resize: vertical; min-height: 80px; }
+
+.form-select option { background: #222; color: #f0f0f0; }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.btn-primary {
+  background: var(--accent);
+  color: #111;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'DM Sans', sans-serif;
+  text-align: center;
+}
+
+.btn-primary:hover { background: #81d4fa; transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+
+.booking-info {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.booking-info p {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+/* ===== GALLERY ===== */
+.folders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 16px;
+  padding-bottom: 20px;
+}
+
+.folder-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 8px;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.folder-item:hover, .folder-item:active {
+  background: rgba(255,255,255,0.06);
+}
+
+.folder-icon {
+  width: 72px;
+  height: 56px;
+  position: relative;
+}
+
+.folder-icon svg { width: 100%; height: 100%; }
+
+.folder-name {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-align: center;
+  word-break: break-word;
+  max-width: 90px;
+  line-height: 1.3;
+}
+
+.folder-count {
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+/* Gallery image grid */
+.gallery-images {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 4px;
+}
+
+.gallery-img-wrap {
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.05);
+  cursor: pointer;
+}
+
+.gallery-img-wrap img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform 0.2s;
+}
+
+.gallery-img-wrap:hover img { transform: scale(1.05); }
+
+.gallery-back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--accent);
+  cursor: pointer;
+  margin-bottom: 14px;
+  padding: 4px 0;
+}
+
+/* ===== ADMIN PANEL ===== */
+.admin-gate {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.admin-gate h2 {
+  font-family: 'Space Mono', monospace;
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.admin-gate p {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.admin-tab {
+  flex: 1;
+  padding: 7px 4px;
+  border-radius: 6px;
+  font-size: 11px;
+  text-align: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.15s;
+}
+
+.admin-tab.active {
+  background: rgba(255,255,255,0.1);
+  color: var(--text-primary);
+}
+
+.admin-section { display: none; }
+.admin-section.active { display: block; }
+
+.admin-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+.admin-card h3 {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.event-list-admin { display: flex; flex-direction: column; gap: 6px; }
+
+.event-item-admin {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 6px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.btn-delete {
+  background: rgba(255,107,107,0.15);
+  border: 1px solid rgba(255,107,107,0.25);
+  color: var(--accent2);
+  border-radius: 5px;
+  padding: 3px 8px;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.btn-delete:hover {
+  background: rgba(255,107,107,0.25);
+}
+
+.btn-secondary {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--text-primary);
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'DM Sans', sans-serif;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+/* folder list in admin */
+.folder-list-admin { display: flex; flex-direction: column; gap: 6px; }
+
+.folder-item-admin {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 6px;
+}
+
+.folder-item-admin span { font-size: 11px; color: var(--text-secondary); }
+
+.btn-manage {
+  background: rgba(79,195,247,0.12);
+  border: 1px solid rgba(79,195,247,0.2);
+  color: var(--accent);
+  border-radius: 5px;
+  padding: 3px 8px;
+  font-size: 10px;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.15s;
+}
+
+.btn-manage:hover { background: rgba(79,195,247,0.2); }
+
+/* upload zone */
+.upload-zone {
+  border: 2px dashed rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  margin-top: 10px;
+}
+
+.upload-zone:hover { border-color: rgba(79,195,247,0.4); }
+.upload-zone p { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+.upload-zone .upload-icon { font-size: 24px; }
+
+/* notification */
+.toast {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(40,40,40,0.95);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px;
+  padding: 8px 18px;
+  font-size: 12px;
+  color: var(--text-primary);
+  z-index: 99999;
+  opacity: 0;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  backdrop-filter: blur(20px);
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* LIGHTBOX */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.9);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.lightbox.show {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.lightbox img {
+  max-width: 100%;
+  max-height: 90vh;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  color: white;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* sub-modal for folder images in admin */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.modal-overlay.show {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.modal-box {
+  background: #222;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+  padding: 20px;
+  width: 100%;
+  max-width: 400px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 18px;
+  padding: 0;
+}
+
+/* Bio edit section */
+.bio-textarea {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: var(--text-primary);
+  font-family: 'DM Sans', sans-serif;
+  outline: none;
+  width: 100%;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.bio-textarea:focus { border-color: rgba(79,195,247,0.5); }
+
+/* image thumbs in admin modal */
+.admin-img-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.admin-img-thumb {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+  background: rgba(255,255,255,0.05);
+}
+
+.admin-img-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.admin-img-del {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(0,0,0,0.7);
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  color: var(--accent2);
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+</style>
+</head>
+<body>
+
+<!-- MENUBAR -->
+<div id="menubar">
+  <div class="menubar-left">
+    <span class="menubar-logo">DJ MELO</span>
+    <div class="menubar-items">
+      <span class="menubar-item">File</span>
+      <span class="menubar-item">View</span>
+      <span class="menubar-item">Help</span>
+    </div>
+  </div>
+  <div class="menubar-right">
+    <span class="menubar-time" id="menubar-clock"></span>
+  </div>
+</div>
+
+<!-- DESKTOP -->
+<div id="desktop">
+  <div class="desktop-title">
+    <h1>DJ MELO</h1>
+    <p>London · Afrobeats · Amapiano · House</p>
+  </div>
+</div>
+
+<!-- DOCK -->
+<div id="dock">
+  <div class="dock-item" data-window="home" onclick="openWindow('home')">
+    <div class="dock-icon home-icon">🎧<span class="dock-dot"></span></div>
+    <span class="dock-label">Home</span>
+  </div>
+  <div class="dock-item" data-window="events" onclick="openWindow('events')">
+    <div class="dock-icon events-icon">🗓️<span class="dock-dot"></span></div>
+    <span class="dock-label">Events</span>
+  </div>
+  <div class="dock-item" data-window="booking" onclick="openWindow('booking')">
+    <div class="dock-icon booking-icon">📋<span class="dock-dot"></span></div>
+    <span class="dock-label">Booking</span>
+  </div>
+  <div class="dock-item" data-window="gallery" onclick="openWindow('gallery')">
+    <div class="dock-icon gallery-icon">🗂️<span class="dock-dot"></span></div>
+    <span class="dock-label">Gallery</span>
+  </div>
+  <div class="dock-item" data-window="admin" onclick="openWindow('admin')">
+    <div class="dock-icon admin-icon">⚙️<span class="dock-dot"></span></div>
+    <span class="dock-label">Admin</span>
+  </div>
+</div>
+
+<!-- ===== HOME WINDOW ===== -->
+<div class="window hidden" id="win-home">
+  <div class="titlebar">
+    <div class="traffic-lights">
+      <div class="tl red" onclick="closeWindow('home')"></div>
+      <div class="tl yellow"></div>
+      <div class="tl green"></div>
+    </div>
+    <div class="titlebar-title">DJ Melo</div>
+    <div style="width:52px"></div>
+  </div>
+  <div class="window-body">
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Menu</div>
+        <div class="sidebar-item active" onclick="homeNav(this,'about')">
+          <span class="sidebar-item-icon">👤</span> About
+        </div>
+        <div class="sidebar-item" onclick="homeNav(this,'mixes')">
+          <span class="sidebar-item-icon">🎵</span> Mixes
+        </div>
+        <div class="sidebar-item" onclick="homeNav(this,'contact')">
+          <span class="sidebar-item-icon">✉️</span> Contact
+        </div>
+      </div>
+    </div>
+    <div class="content">
+      <!-- ABOUT -->
+      <div class="page-section active" id="home-about">
+        <div class="hero-block">
+          <div class="hero-avatar">M</div>
+          <div class="status-badge">
+            <span class="status-dot"></span>
+            Available for bookings
+          </div>
+          <div class="hero-name" id="display-hero-name">DJ Melo</div>
+          <div class="hero-tag" id="display-hero-tag">London · Afrobeats · Amapiano · House</div>
+          <div class="hero-bio" id="display-hero-bio">Bringing the heat to every dance floor. Known for high-energy sets blending Afrobeats, Amapiano and UK House. Resident at some of London's most iconic venues.</div>
+          <div class="stats-row">
+            <div class="stat-card">
+              <span class="stat-num">150+</span>
+              <span class="stat-label">Shows</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-num">5★</span>
+              <span class="stat-label">Rating</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-num">3yr</span>
+              <span class="stat-label">Active</span>
+            </div>
+          </div>
+          <div class="genres-row" id="display-genres">
+            <span class="genre-tag">Afrobeats</span>
+            <span class="genre-tag">Amapiano</span>
+            <span class="genre-tag">UK House</span>
+            <span class="genre-tag">Dancehall</span>
+            <span class="genre-tag">R&B</span>
+          </div>
+          <div class="socials-row">
+            <a class="social-btn" href="#" id="link-instagram" target="_blank">
+              <span>📸</span> Instagram
+            </a>
+            <a class="social-btn" href="#" id="link-soundcloud" target="_blank">
+              <span>🎧</span> SoundCloud
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- MIXES -->
+      <div class="page-section" id="home-mixes">
+        <div class="section-header">
+          <span class="section-title">Latest Mixes</span>
+        </div>
+        <div id="mixes-list">
+          <div class="empty-state">
+            <div class="empty-icon">🎵</div>
+            <p>No mixes added yet.<br>Add mixes from the Admin panel.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTACT -->
+      <div class="page-section" id="home-contact">
+        <div class="section-header">
+          <span class="section-title">Get In Touch</span>
+        </div>
+        <div class="booking-info">
+          <p>For bookings and inquiries use the <strong style="color:var(--text-primary)">Booking</strong> window. For general chat, hit up any of the socials below.</p>
+        </div>
+        <div class="socials-row" style="justify-content:flex-start; gap:8px">
+          <a class="social-btn" href="#" id="link-instagram2" target="_blank">📸 Instagram</a>
+          <a class="social-btn" href="#" id="link-tiktok" target="_blank">🎵 TikTok</a>
+          <a class="social-btn" href="#" id="link-soundcloud2" target="_blank">🎧 SoundCloud</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== EVENTS WINDOW ===== -->
+<div class="window hidden" id="win-events">
+  <div class="titlebar">
+    <div class="traffic-lights">
+      <div class="tl red" onclick="closeWindow('events')"></div>
+      <div class="tl yellow"></div>
+      <div class="tl green"></div>
+    </div>
+    <div class="titlebar-title">Events</div>
+    <div style="width:52px"></div>
+  </div>
+  <div class="window-body">
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Filter</div>
+        <div class="sidebar-item active" onclick="filterEvents(this,'upcoming')">
+          <span class="sidebar-item-icon">📅</span> Upcoming
+        </div>
+        <div class="sidebar-item" onclick="filterEvents(this,'past')">
+          <span class="sidebar-item-icon">🕐</span> Past
+        </div>
+        <div class="sidebar-item" onclick="filterEvents(this,'all')">
+          <span class="sidebar-item-icon">☰</span> All
+        </div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="section-header">
+        <span class="section-title" id="events-section-title">Upcoming</span>
+      </div>
+      <div class="events-list" id="events-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== BOOKING WINDOW ===== -->
+<div class="window hidden" id="win-booking">
+  <div class="titlebar">
+    <div class="traffic-lights">
+      <div class="tl red" onclick="closeWindow('booking')"></div>
+      <div class="tl yellow"></div>
+      <div class="tl green"></div>
+    </div>
+    <div class="titlebar-title">Book DJ Melo</div>
+    <div style="width:52px"></div>
+  </div>
+  <div class="window-body" style="overflow-y:auto">
+    <div class="content" style="width:100%">
+      <div class="booking-info">
+        <p>🎉 Ready to book DJ Melo for your event? Fill out the form below and I'll get back to you within 24 hours.</p>
+      </div>
+      <div class="booking-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input class="form-input" id="book-first" placeholder="Jay" type="text">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input class="form-input" id="book-last" placeholder="Smith" type="text">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" id="book-email" placeholder="you@email.com" type="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input class="form-input" id="book-phone" placeholder="+44 7000 000000" type="tel">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Event Date</label>
+            <input class="form-input" id="book-date" type="date">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Event Type</label>
+            <select class="form-select form-input" id="book-type">
+              <option value="">Select...</option>
+              <option>Club Night</option>
+              <option>Private Party</option>
+              <option>Wedding</option>
+              <option>Corporate Event</option>
+              <option>Festival</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Venue / Location</label>
+          <input class="form-input" id="book-venue" placeholder="Club name, London" type="text">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Additional Info</label>
+          <textarea class="form-textarea" id="book-notes" placeholder="Set length, genre preferences, etc..."></textarea>
+        </div>
+        <button class="btn-primary" onclick="submitBooking()">Send Booking Request →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== GALLERY WINDOW ===== -->
+<div class="window hidden" id="win-gallery">
+  <div class="titlebar">
+    <div class="traffic-lights">
+      <div class="tl red" onclick="closeWindow('gallery')"></div>
+      <div class="tl yellow"></div>
+      <div class="tl green"></div>
+    </div>
+    <div class="titlebar-title" id="gallery-title">Gallery</div>
+    <div style="width:52px"></div>
+  </div>
+  <div class="window-body">
+    <div class="sidebar" id="gallery-sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Folders</div>
+        <div id="gallery-sidebar-folders"></div>
+      </div>
+    </div>
+    <div class="content" id="gallery-content">
+      <!-- folders or images rendered here -->
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADMIN WINDOW ===== -->
+<div class="window hidden" id="win-admin">
+  <div class="titlebar">
+    <div class="traffic-lights">
+      <div class="tl red" onclick="closeWindow('admin')"></div>
+      <div class="tl yellow"></div>
+      <div class="tl green"></div>
+    </div>
+    <div class="titlebar-title">Admin Panel</div>
+    <div style="width:52px"></div>
+  </div>
+  <div class="window-body" style="overflow-y:auto; flex-direction:column;">
+    <div class="content" style="width:100%">
+
+      <!-- LOGIN GATE -->
+      <div id="admin-gate">
+        <div class="admin-gate">
+          <div style="font-size:40px;margin-bottom:12px">🔐</div>
+          <h2>Admin Access</h2>
+          <p>Enter your password to manage content</p>
+          <div class="form-group" style="max-width:260px;margin:0 auto 12px">
+            <input class="form-input" id="admin-pw" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')adminLogin()">
+          </div>
+          <button class="btn-primary" style="max-width:260px;width:100%" onclick="adminLogin()">Unlock →</button>
+          <p style="font-size:10px;color:var(--text-muted);margin-top:12px">Default: <code style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:3px">djmelo2024</code></p>
+        </div>
+      </div>
+
+      <!-- ADMIN PANEL (locked behind pw) -->
+      <div id="admin-panel" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <span style="font-family:'Space Mono',monospace;font-size:13px;font-weight:700">🛠 Dashboard</span>
+          <button class="btn-delete" onclick="adminLogout()">Log out</button>
+        </div>
+
+        <div class="admin-tabs">
+          <div class="admin-tab active" onclick="adminTab(this,'events')">Events</div>
+          <div class="admin-tab" onclick="adminTab(this,'gallery')">Gallery</div>
+          <div class="admin-tab" onclick="adminTab(this,'profile')">Profile</div>
+        </div>
+
+        <!-- EVENTS TAB -->
+        <div class="admin-section active" id="admin-events">
+          <div class="admin-card">
+            <h3>Add Event</h3>
+            <div class="booking-form" style="gap:8px">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Event Name</label>
+                  <input class="form-input" id="ev-name" placeholder="Night Out">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Date</label>
+                  <input class="form-input" id="ev-date" type="date">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Venue</label>
+                  <input class="form-input" id="ev-venue" placeholder="Fabric, London">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Time</label>
+                  <input class="form-input" id="ev-time" type="time">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Ticket Link (optional)</label>
+                <input class="form-input" id="ev-link" placeholder="https://...">
+              </div>
+              <button class="btn-primary" onclick="addEvent()">Add Event</button>
+            </div>
+          </div>
+          <div class="admin-card">
+            <h3>Manage Events</h3>
+            <div class="event-list-admin" id="admin-events-list"></div>
+          </div>
+        </div>
+
+        <!-- GALLERY TAB -->
+        <div class="admin-section" id="admin-gallery">
+          <div class="admin-card">
+            <h3>Create Folder</h3>
+            <div class="form-group" style="margin-bottom:8px">
+              <input class="form-input" id="folder-name-input" placeholder="e.g. Fabric Night 2024">
+            </div>
+            <button class="btn-primary" onclick="createFolder()">Create Folder</button>
+          </div>
+          <div class="admin-card">
+            <h3>Manage Folders</h3>
+            <div class="folder-list-admin" id="admin-folders-list"></div>
+          </div>
+        </div>
+
+        <!-- PROFILE TAB -->
+        <div class="admin-section" id="admin-profile">
+          <div class="admin-card">
+            <h3>Edit Bio</h3>
+            <div class="booking-form" style="gap:8px">
+              <div class="form-group">
+                <label class="form-label">Display Name</label>
+                <input class="form-input" id="prof-name" placeholder="DJ Melo">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Tagline</label>
+                <input class="form-input" id="prof-tag" placeholder="London · Afrobeats...">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Bio</label>
+                <textarea class="bio-textarea" id="prof-bio" placeholder="Your bio..."></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Instagram URL</label>
+                <input class="form-input" id="prof-ig" placeholder="https://instagram.com/...">
+              </div>
+              <div class="form-group">
+                <label class="form-label">SoundCloud URL</label>
+                <input class="form-input" id="prof-sc" placeholder="https://soundcloud.com/...">
+              </div>
+              <div class="form-group">
+                <label class="form-label">TikTok URL</label>
+                <input class="form-input" id="prof-tt" placeholder="https://tiktok.com/...">
+              </div>
+              <button class="btn-primary" onclick="saveProfile()">Save Profile</button>
+            </div>
+          </div>
+
+          <div class="admin-card">
+            <h3>Add Mix Link</h3>
+            <div class="booking-form" style="gap:8px">
+              <div class="form-group">
+                <label class="form-label">Mix Title</label>
+                <input class="form-input" id="mix-title" placeholder="Summer Mix Vol.1">
+              </div>
+              <div class="form-group">
+                <label class="form-label">SoundCloud / YouTube Embed URL</label>
+                <input class="form-input" id="mix-url" placeholder="https://...">
+              </div>
+              <button class="btn-primary" onclick="addMix()">Add Mix</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOLDER IMAGE MODAL -->
+<div class="modal-overlay" id="folder-modal">
+  <div class="modal-box">
+    <div class="modal-title">
+      <span id="modal-folder-name">Folder</span>
+      <button class="modal-close" onclick="closeFolderModal()">×</button>
+    </div>
+    <div class="admin-img-grid" id="modal-img-grid"></div>
+    <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+      <div class="upload-icon">📁</div>
+      <p>Tap to upload images</p>
+    </div>
+    <input type="file" id="file-input" accept="image/*" multiple style="display:none" onchange="handleImageUpload(event)">
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">×</button>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// =================== STATE ===================
+const ADMIN_PW = 'djmelo2024';
+let adminUnlocked = false;
+let currentFolderModal = null;
+
+// Load from localStorage
+function loadData(key, fallback) {
+  try { return JSON.parse(localStorage.getItem('djmelo_' + key)) || fallback; }
+  catch { return fallback; }
+}
+
+function saveData(key, val) {
+  localStorage.setItem('djmelo_' + key, JSON.stringify(val));
+}
+
+let events = loadData('events', []);
+let galleries = loadData('galleries', { 'Live Sets': [], 'Promo Shots': [], 'Behind the Scenes': [] });
+let profile = loadData('profile', {
+  name: 'DJ Melo',
+  tag: 'London · Afrobeats · Amapiano · House',
+  bio: 'Bringing the heat to every dance floor. Known for high-energy sets blending Afrobeats, Amapiano and UK House. Resident at some of London\'s most iconic venues.',
+  instagram: '#',
+  soundcloud: '#',
+  tiktok: '#'
+});
+let mixes = loadData('mixes', []);
+
+// =================== CLOCK ===================
+function updateClock() {
+  const now = new Date();
+  document.getElementById('menubar-clock').textContent =
+    now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+}
+updateClock();
+setInterval(updateClock, 10000);
+
+// =================== WINDOWS ===================
+let openWindows = {};
+
+function openWindow(name) {
+  const win = document.getElementById('win-' + name);
+  if (!win) return;
+  // Close others on mobile
+  if (window.innerWidth <= 768) {
+    Object.keys(openWindows).forEach(k => {
+      if (k !== name) {
+        document.getElementById('win-' + k)?.classList.add('hidden');
+        document.querySelector(`.dock-item[data-window="${k}"]`)?.classList.remove('open');
+        delete openWindows[k];
+      }
+    });
+  }
+  win.classList.remove('hidden');
+  win.classList.add('active');
+  openWindows[name] = true;
+  document.querySelector(`.dock-item[data-window="${name}"]`)?.classList.add('open');
+  // Refresh content
+  if (name === 'events') renderEvents();
+  if (name === 'gallery') renderGallery();
+  if (name === 'admin' && adminUnlocked) refreshAdminData();
+  applyProfile();
+}
+
+function closeWindow(name) {
+  const win = document.getElementById('win-' + name);
+  if (!win) return;
+  win.classList.add('hidden');
+  win.classList.remove('active');
+  delete openWindows[name];
+  document.querySelector(`.dock-item[data-window="${name}"]`)?.classList.remove('open');
+}
+
+// =================== HOME NAV ===================
+function homeNav(el, section) {
+  document.querySelectorAll('#win-home .sidebar-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('#win-home .page-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('home-' + section)?.classList.add('active');
+  if (section === 'mixes') renderMixes();
+}
+
+// =================== PROFILE ===================
+function applyProfile() {
+  document.getElementById('display-hero-name').textContent = profile.name;
+  document.getElementById('display-hero-tag').textContent = profile.tag;
+  document.getElementById('display-hero-bio').textContent = profile.bio;
+  const links = ['link-instagram', 'link-instagram2'];
+  links.forEach(id => { const el = document.getElementById(id); if (el) el.href = profile.instagram || '#'; });
+  const sc = document.getElementById('link-soundcloud');
+  const sc2 = document.getElementById('link-soundcloud2');
+  if (sc) sc.href = profile.soundcloud || '#';
+  if (sc2) sc2.href = profile.soundcloud || '#';
+  const tt = document.getElementById('link-tiktok');
+  if (tt) tt.href = profile.tiktok || '#';
+}
+applyProfile();
+
+function saveProfile() {
+  profile.name = document.getElementById('prof-name').value || profile.name;
+  profile.tag = document.getElementById('prof-tag').value || profile.tag;
+  profile.bio = document.getElementById('prof-bio').value || profile.bio;
+  profile.instagram = document.getElementById('prof-ig').value || profile.instagram;
+  profile.soundcloud = document.getElementById('prof-sc').value || profile.soundcloud;
+  profile.tiktok = document.getElementById('prof-tt').value || profile.tiktok;
+  saveData('profile', profile);
+  applyProfile();
+  showToast('✅ Profile saved!');
+}
+
+// =================== EVENTS ===================
+function renderEvents(filter = 'upcoming') {
+  const list = document.getElementById('events-list');
+  const today = new Date(); today.setHours(0,0,0,0);
+  let filtered = events.filter(e => {
+    const d = new Date(e.date);
+    if (filter === 'upcoming') return d >= today;
+    if (filter === 'past') return d < today;
+    return true;
+  });
+  filtered.sort((a,b) => new Date(a.date) - new Date(b.date));
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">🗓️</div><p>No ${filter} events.<br>Check back soon!</p></div>`;
+    return;
+  }
+  list.innerHTML = filtered.map(e => {
+    const d = new Date(e.date + 'T00:00:00');
+    const day = d.getDate();
+    const month = d.toLocaleString('en-GB', { month: 'short' }).toUpperCase();
+    return `<div class="event-card" ${e.link ? `onclick="window.open('${e.link}','_blank')"` : ''}>
+      <div class="event-date-box">
+        <span class="event-day">${day}</span>
+        <span class="event-month">${month}</span>
+      </div>
+      <div class="event-info">
+        <div class="event-name">${e.name}</div>
+        <div class="event-venue">📍 ${e.venue}</div>
+      </div>
+      <div class="event-time">${e.time || ''}</div>
+    </div>`;
+  }).join('');
+}
+
+function filterEvents(el, type) {
+  document.querySelectorAll('#win-events .sidebar-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('events-section-title').textContent =
+    type.charAt(0).toUpperCase() + type.slice(1);
+  renderEvents(type);
+}
+
+function addEvent() {
+  const name = document.getElementById('ev-name').value.trim();
+  const date = document.getElementById('ev-date').value;
+  const venue = document.getElementById('ev-venue').value.trim();
+  const time = document.getElementById('ev-time').value;
+  const link = document.getElementById('ev-link').value.trim();
+  if (!name || !date || !venue) { showToast('⚠️ Fill in name, date and venue'); return; }
+  events.push({ id: Date.now(), name, date, venue, time, link });
+  saveData('events', events);
+  ['ev-name','ev-date','ev-venue','ev-time','ev-link'].forEach(id => document.getElementById(id).value = '');
+  renderAdminEvents();
+  showToast('✅ Event added!');
+}
+
+function deleteEvent(id) {
+  events = events.filter(e => e.id !== id);
+  saveData('events', events);
+  renderAdminEvents();
+  showToast('🗑️ Event removed');
+}
+
+function renderAdminEvents() {
+  const list = document.getElementById('admin-events-list');
+  if (!events.length) {
+    list.innerHTML = `<p style="font-size:11px;color:var(--text-muted)">No events added yet.</p>`;
+    return;
+  }
+  list.innerHTML = events.map(e =>
+    `<div class="event-item-admin">
+      <span>${e.name} · ${e.date}</span>
+      <button class="btn-delete" onclick="deleteEvent(${e.id})">Delete</button>
+    </div>`
+  ).join('');
+}
+
+// =================== GALLERY ===================
+function folderIconSVG(color = '#4a9eff') {
+  return `<svg viewBox="0 0 72 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M4 14C4 11.8 5.8 10 8 10H28L34 16H64C66.2 16 68 17.8 68 20V48C68 50.2 66.2 52 64 52H8C5.8 52 4 50.2 4 48V14Z" fill="${color}" opacity="0.15"/>
+    <path d="M4 14C4 11.8 5.8 10 8 10H28L34 16H64C66.2 16 68 17.8 68 20V48C68 50.2 66.2 52 64 52H8C5.8 52 4 50.2 4 48V14Z" stroke="${color}" stroke-width="1.5" opacity="0.6"/>
+    <path d="M4 20H68" stroke="${color}" stroke-width="1" opacity="0.3"/>
+  </svg>`;
+}
+
+function renderGallery(openFolder = null) {
+  const content = document.getElementById('gallery-content');
+  const titleEl = document.getElementById('gallery-title');
+  const sidebarFolders = document.getElementById('gallery-sidebar-folders');
+
+  // Sidebar folder list
+  sidebarFolders.innerHTML = Object.keys(galleries).map(name =>
+    `<div class="sidebar-item ${openFolder === name ? 'active' : ''}" onclick="renderGallery('${escHtml(name)}')">
+      <span class="sidebar-item-icon">🗂️</span> ${escHtml(name)}
+    </div>`
+  ).join('');
+
+  if (!openFolder) {
+    titleEl.textContent = 'Gallery';
+    const folderKeys = Object.keys(galleries);
+    if (!folderKeys.length) {
+      content.innerHTML = `<div class="empty-state"><div class="empty-icon">🗂️</div><p>No folders yet.<br>Create one in Admin.</p></div>`;
+      return;
+    }
+    content.innerHTML = `<div class="folders-grid">${
+      folderKeys.map(name =>
+        `<div class="folder-item" onclick="renderGallery('${escHtml(name)}')">
+          <div class="folder-icon">${folderIconSVG()}</div>
+          <div class="folder-name">${escHtml(name)}</div>
+          <div class="folder-count">${galleries[name].length} items</div>
+        </div>`
+      ).join('')
+    }</div>`;
+  } else {
+    titleEl.textContent = openFolder;
+    const imgs = galleries[openFolder] || [];
+    let html = `<div class="gallery-back" onclick="renderGallery()">‹ Back</div>`;
+    if (!imgs.length) {
+      html += `<div class="empty-state"><div class="empty-icon">🖼️</div><p>No images in this folder yet.</p></div>`;
+    } else {
+      html += `<div class="gallery-images">${
+        imgs.map((src,i) =>
+          `<div class="gallery-img-wrap" onclick="openLightbox('${escHtml(src)}')">
+            <img src="${escHtml(src)}" loading="lazy" alt="">
+          </div>`
+        ).join('')
+      }</div>`;
+    }
+    content.innerHTML = html;
+    // Update sidebar active
+    document.querySelectorAll('#gallery-sidebar .sidebar-item').forEach(el => {
+      el.classList.toggle('active', el.textContent.trim() === openFolder);
+    });
+  }
+}
+
+// =================== ADMIN ===================
+function adminLogin() {
+  const pw = document.getElementById('admin-pw').value;
+  if (pw === ADMIN_PW) {
+    adminUnlocked = true;
+    document.getElementById('admin-gate').style.display = 'none';
+    document.getElementById('admin-panel').style.display = 'block';
+    refreshAdminData();
+    showToast('✅ Welcome back!');
+  } else {
+    showToast('❌ Wrong password');
+    document.getElementById('admin-pw').value = '';
+  }
+}
+
+function adminLogout() {
+  adminUnlocked = false;
+  document.getElementById('admin-gate').style.display = 'block';
+  document.getElementById('admin-panel').style.display = 'none';
+  document.getElementById('admin-pw').value = '';
+}
+
+function adminTab(el, tab) {
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('admin-' + tab)?.classList.add('active');
+}
+
+function refreshAdminData() {
+  renderAdminEvents();
+  renderAdminFolders();
+  // fill profile fields
+  document.getElementById('prof-name').value = profile.name;
+  document.getElementById('prof-tag').value = profile.tag;
+  document.getElementById('prof-bio').value = profile.bio;
+  document.getElementById('prof-ig').value = profile.instagram;
+  document.getElementById('prof-sc').value = profile.soundcloud;
+  document.getElementById('prof-tt').value = profile.tiktok;
+}
+
+function createFolder() {
+  const name = document.getElementById('folder-name-input').value.trim();
+  if (!name) { showToast('⚠️ Enter a folder name'); return; }
+  if (galleries[name]) { showToast('⚠️ Folder already exists'); return; }
+  galleries[name] = [];
+  saveData('galleries', galleries);
+  document.getElementById('folder-name-input').value = '';
+  renderAdminFolders();
+  showToast('✅ Folder created!');
+}
+
+function deleteFolder(name) {
+  if (!confirm(`Delete folder "${name}"?`)) return;
+  delete galleries[name];
+  saveData('galleries', galleries);
+  renderAdminFolders();
+  showToast('🗑️ Folder deleted');
+}
+
+function renderAdminFolders() {
+  const list = document.getElementById('admin-folders-list');
+  const keys = Object.keys(galleries);
+  if (!keys.length) {
+    list.innerHTML = `<p style="font-size:11px;color:var(--text-muted)">No folders yet.</p>`;
+    return;
+  }
+  list.innerHTML = keys.map(name =>
+    `<div class="folder-item-admin">
+      <span>📁 ${escHtml(name)} <span style="color:var(--text-muted)">(${galleries[name].length})</span></span>
+      <div style="display:flex;gap:5px">
+        <button class="btn-manage" onclick="openFolderModal('${escHtml(name)}')">Manage</button>
+        <button class="btn-delete" onclick="deleteFolder('${escHtml(name)}')">Del</button>
+      </div>
+    </div>`
+  ).join('');
+}
+
+// ===== FOLDER MODAL =====
+function openFolderModal(name) {
+  currentFolderModal = name;
+  document.getElementById('modal-folder-name').textContent = name;
+  renderModalImages();
+  document.getElementById('folder-modal').classList.add('show');
+}
+
+function closeFolderModal() {
+  document.getElementById('folder-modal').classList.remove('show');
+  currentFolderModal = null;
+  renderGallery(); // refresh gallery
+}
+
+function renderModalImages() {
+  const grid = document.getElementById('modal-img-grid');
+  const imgs = galleries[currentFolderModal] || [];
+  if (!imgs.length) {
+    grid.innerHTML = `<p style="font-size:11px;color:var(--text-muted);grid-column:1/-1">No images yet.</p>`;
+    return;
+  }
+  grid.innerHTML = imgs.map((src, i) =>
+    `<div class="admin-img-thumb">
+      <img src="${escHtml(src)}" loading="lazy">
+      <button class="admin-img-del" onclick="deleteImage(${i})">×</button>
+    </div>`
+  ).join('');
+}
+
+function deleteImage(idx) {
+  galleries[currentFolderModal].splice(idx, 1);
+  saveData('galleries', galleries);
+  renderModalImages();
+}
+
+function handleImageUpload(event) {
+  const files = Array.from(event.target.files);
+  if (!files.length || !currentFolderModal) return;
+  let loaded = 0;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      galleries[currentFolderModal].push(e.target.result);
+      loaded++;
+      if (loaded === files.length) {
+        saveData('galleries', galleries);
+        renderModalImages();
+        showToast(`✅ ${files.length} image${files.length > 1 ? 's' : ''} added!`);
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+  event.target.value = '';
+}
+
+// ===== MIXES =====
+function addMix() {
+  const title = document.getElementById('mix-title').value.trim();
+  const url = document.getElementById('mix-url').value.trim();
+  if (!title || !url) { showToast('⚠️ Enter title and URL'); return; }
+  mixes.push({ id: Date.now(), title, url });
+  saveData('mixes', mixes);
+  document.getElementById('mix-title').value = '';
+  document.getElementById('mix-url').value = '';
+  showToast('✅ Mix added!');
+}
+
+function renderMixes() {
+  const list = document.getElementById('mixes-list');
+  if (!mixes.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">🎵</div><p>No mixes added yet.<br>Add mixes from the Admin panel.</p></div>`;
+    return;
+  }
+  list.innerHTML = mixes.map(m =>
+    `<div class="admin-card" style="cursor:pointer" onclick="window.open('${escHtml(m.url)}','_blank')">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:24px">🎧</span>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--text-primary)">${escHtml(m.title)}</div>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:2px">Tap to listen →</div>
+        </div>
+      </div>
+    </div>`
+  ).join('');
+}
+
+// ===== BOOKING =====
+function submitBooking() {
+  const first = document.getElementById('book-first').value.trim();
+  const email = document.getElementById('book-email').value.trim();
+  const date = document.getElementById('book-date').value;
+  const type = document.getElementById('book-type').value;
+  if (!first || !email || !date || !type) {
+    showToast('⚠️ Please fill all required fields');
+    return;
+  }
+  // In production: send to email/form service
+  showToast('✅ Booking request sent!');
+  ['book-first','book-last','book-email','book-phone','book-date','book-venue','book-notes'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('book-type').value = '';
+}
+
+// ===== LIGHTBOX =====
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('show');
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('show');
+}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ===== UTILS =====
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+// ===== INIT =====
+openWindow('home');
+</script>
+</body>
+</html>
